@@ -3,10 +3,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = void 0;
 const vscode = require("vscode");
 const NodePath = require("path");
+const KeyVditorOptions = 'vditor.options';
 function activate(context) {
     context.subscriptions.push(vscode.commands.registerCommand('markdown-editor.startEditor', () => {
-        EditorPanel.createOrShow(context.extensionUri);
+        EditorPanel.createOrShow(context);
     }));
+    context.globalState.setKeysForSync([KeyVditorOptions]);
 }
 exports.activate = activate;
 function getWebviewOptions(extensionUri) {
@@ -20,8 +22,9 @@ function getWebviewOptions(extensionUri) {
  * Manages cat coding webview panels
  */
 class EditorPanel {
-    constructor(_panel, _extensionUri, _document) {
+    constructor(_context, _panel, _extensionUri, _document) {
         // Set the webview's initial html content
+        this._context = _context;
         this._panel = _panel;
         this._extensionUri = _extensionUri;
         this._document = _document;
@@ -62,10 +65,15 @@ class EditorPanel {
         // )
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(async (message) => {
-            console.log('webview review', message);
+            console.log('msg from webview review', message);
             switch (message.command) {
                 case 'ready':
-                    this._update();
+                    this._update({
+                        options: this._context.globalState.get(KeyVditorOptions)
+                    });
+                    break;
+                case 'save-options':
+                    this._context.globalState.update(KeyVditorOptions, message.options);
                     break;
                 case 'info':
                     vscode.window.showInformationMessage(message.content);
@@ -99,7 +107,8 @@ class EditorPanel {
             }
         }, null, this._disposables);
     }
-    static createOrShow(extensionUri) {
+    static createOrShow(context) {
+        const { extensionUri } = context;
         const column = vscode.window.activeTextEditor
             ? vscode.window.activeTextEditor.viewColumn
             : undefined;
@@ -119,10 +128,7 @@ class EditorPanel {
         }
         // Otherwise, create a new panel.
         const panel = vscode.window.createWebviewPanel(EditorPanel.viewType, 'markdown-editor', column || vscode.ViewColumn.One, getWebviewOptions(extensionUri));
-        EditorPanel.currentPanel = new EditorPanel(panel, extensionUri, doc);
-    }
-    static revive(panel, extensionUri, doc) {
-        EditorPanel.currentPanel = new EditorPanel(panel, extensionUri, doc);
+        EditorPanel.currentPanel = new EditorPanel(context, panel, extensionUri, doc);
     }
     dispose() {
         EditorPanel.currentPanel = undefined;
@@ -138,17 +144,18 @@ class EditorPanel {
     _init() {
         const webview = this._panel.webview;
         this._panel.webview.html = this._getHtmlForWebview(webview);
-        console.log('init html', this._panel.webview.html);
+        this._panel.title = this._document.fileName;
     }
     // private fileToWebviewUri = (f: string) => {
     //   return this._panel.webview.asWebviewUri(vscode.Uri.file(f)).toString()
     // }
-    _update() {
+    _update({ options } = { options: void 0 }) {
         let md = this._document.getText();
         // const dir = NodePath.dirname(this._document.fileName)
         this._panel.webview.postMessage({
             command: 'update',
             content: md,
+            options,
         });
     }
     _getHtmlForWebview(webview) {

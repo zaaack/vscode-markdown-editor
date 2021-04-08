@@ -125,13 +125,17 @@ function fixDarkTheme() {
 }
 
 function fixPanelHover() {
-  $('.vditor-panel').on('mouseenter', (e) => {
-    e.currentTarget.classList.add('vditor-panel_hover')
-  }).on('mouseleave', e => {
-    let el = e.currentTarget
-    setTimeout(() => {
-      el.classList.remove('vditor-panel_hover')
-    }, 2000)
+  $('.vditor-panel').each((i, e) => {
+    let timer
+    $(e).on('mouseenter', (e) => {
+      timer && clearTimeout(timer)
+      e.currentTarget.classList.add('vditor-panel_hover')
+    }).on('mouseleave', e => {
+      let el = e.currentTarget
+      timer = setTimeout(() => {
+        el.classList.remove('vditor-panel_hover')
+      }, 2000)
+    })
   })
 }
 
@@ -155,29 +159,16 @@ const fileToBase64 = async (file) => {
   })
 }
 
-let vditorOptions = {
-  theme: 'classic',
-  mode: 'wysiwyg',
-  preview: {}
-}
-const VditorOptionsKey = 'vditorOptions'
-if (localStorage[VditorOptionsKey]) {
-  try {
-    vditorOptions = JSON.parse(localStorage[VditorOptionsKey])
-  } catch (error) {
-    console.error(error)
-  }
-}
-
 function saveVditorOptions() {
-  let newVditorOptions = {
+  let vditorOptions = {
     theme: vditor.vditor.options.theme,
     mode: vditor.vditor.options.mode,
     preview: vditor.vditor.options.preview
   }
-
-  vditorOptions = newVditorOptions
-  localStorage.setItem(VditorOptionsKey, JSON.stringify(vditorOptions))
+  vscode.postMessage({
+    command: 'save-options',
+    options: vditorOptions
+  })
 }
 
 function handleToolbarClick() {
@@ -188,17 +179,19 @@ function handleToolbarClick() {
   })
 }
 
-function initVditor(value = '') {
+function initVditor(value = '', options = {}) {
   vditor = new Vditor('vditor', {
     width: '100%',
     height: '100%',
     minHeight: '100%',
     lang: lang,
     value,
+    theme: 'dark',
+    mode: 'wysiwyg',
     cache: { enable: false },
     toolbar,
     toolbarConfig: { pin: true },
-    ...vditorOptions,
+    ...options,
     after() {
       fixDarkTheme()
       fixPanelHover()
@@ -232,7 +225,14 @@ window.addEventListener('message', (e) => {
   switch (msg.command) {
     case 'update': {
       if (!vditor) {
-        initVditor(msg.content)
+        try {
+          initVditor(msg.content, msg.options)
+        } catch (error) {
+          // reset options when error
+          console.error(error)
+          initVditor(msg.content)
+          saveVditorOptions()
+        }
         console.log('initVditor')
       } else {
         vditor.setValue(msg.content)

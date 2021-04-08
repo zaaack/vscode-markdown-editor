@@ -1,12 +1,13 @@
 import * as vscode from 'vscode'
 import * as NodePath from 'path'
-
+const KeyVditorOptions = 'vditor.options'
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand('markdown-editor.startEditor', () => {
-      EditorPanel.createOrShow(context.extensionUri)
+      EditorPanel.createOrShow(context)
     })
   )
+  context.globalState.setKeysForSync([KeyVditorOptions])
 }
 
 function getWebviewOptions(
@@ -33,7 +34,8 @@ class EditorPanel {
 
   private _disposables: vscode.Disposable[] = []
 
-  public static createOrShow(extensionUri: vscode.Uri) {
+  public static createOrShow(context: vscode.ExtensionContext) {
+    const { extensionUri  } = context
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined
@@ -63,18 +65,11 @@ class EditorPanel {
       getWebviewOptions(extensionUri)
     )
 
-    EditorPanel.currentPanel = new EditorPanel(panel, extensionUri, doc)
-  }
-
-  public static revive(
-    panel: vscode.WebviewPanel,
-    extensionUri: vscode.Uri,
-    doc: vscode.TextDocument
-  ) {
-    EditorPanel.currentPanel = new EditorPanel(panel, extensionUri, doc)
+    EditorPanel.currentPanel = new EditorPanel(context, panel, extensionUri, doc)
   }
 
   private constructor(
+    private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
     private readonly _extensionUri: vscode.Uri,
     public readonly _document: vscode.TextDocument
@@ -116,14 +111,18 @@ class EditorPanel {
     //   null,
     //   this._disposables
     // )
-
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
-        console.log('webview review', message)
+        console.log('msg from webview review', message)
         switch (message.command) {
           case 'ready':
-            this._update()
+            this._update({
+              options: this._context.globalState.get(KeyVditorOptions)
+            })
+            break
+          case 'save-options':
+            this._context.globalState.update(KeyVditorOptions, message.options)
             break
           case 'info':
             vscode.window.showInformationMessage(message.content)
@@ -195,7 +194,7 @@ class EditorPanel {
     const webview = this._panel.webview
 
     this._panel.webview.html = this._getHtmlForWebview(webview)
-    console.log('init html', this._panel.webview.html)
+    this._panel.title = this._document.fileName
   }
 
   // private fileToWebviewUri = (f: string) => {
@@ -203,12 +202,13 @@ class EditorPanel {
   // }
 
 
-  private _update() {
+  private _update({ options } = { options: void 0 }) {
     let md = this._document.getText()
     // const dir = NodePath.dirname(this._document.fileName)
     this._panel.webview.postMessage({
       command: 'update',
       content: md,
+      options,
     })
   }
 

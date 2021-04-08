@@ -25,7 +25,7 @@ html,body, #vditor {
 	color: black;
 	text-align: center;
 }
-/* .vditor-panel:hover,  */
+.vditor-panel:hover,
 .vditor-panel_hover {
 	opacity: .86;
 	max-width: none;
@@ -33,7 +33,7 @@ html,body, #vditor {
 	overflow: visible;
 }
 
-/* .vditor-panel:hover:after,  */
+.vditor-panel:hover:after,
 .vditor-panel_hover:after {
 	display: none;
 }
