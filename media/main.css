@@ -1,43 +1,45 @@
 body {
-	margin: 0;
-	padding: 0;
+  margin: 0;
+  padding: 0;
 }
-html,body, #vditor {
-	height: 100%;
-	width: 100%;
+html,
+body,
+#vditor {
+  height: 100%;
+  width: 100%;
 }
 
 .vditor-panel {
-	transform: translate(-25px, 0);
-	max-width: 21px;
-	max-height: 21px;
-	overflow: hidden;
-	transition: width .2s ease-in-out;
+  transform: translate(-25px, 0);
+  max-width: 21px;
+  max-height: 21px;
+  overflow: hidden;
+  transition: width 0.2s ease-in-out;
 }
 .vditor-panel::after {
-	content: '...';
-	width: 21px;
-	height: 21px;
-	position: absolute;
-	left: 0;
-	top: 0;
-	background-color: white;
-	color: black;
-	text-align: center;
+  content: '...';
+  width: 21px;
+  height: 21px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background-color: white;
+  color: black;
+  text-align: center;
 }
 .vditor-panel:hover,
 .vditor-panel_hover {
-	opacity: .86;
-	max-width: none;
-	max-height: none;
-	overflow: visible;
+  opacity: 0.86;
+  max-width: none;
+  max-height: none;
+  overflow: visible;
 }
 
 .vditor-panel:hover:after,
 .vditor-panel_hover:after {
-	display: none;
+  display: none;
 }
 
 .vditor-reset {
-	padding-left: 35px!important;
+  padding-left: 35px !important;
 }

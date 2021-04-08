@@ -179,7 +179,6 @@ function initVditor(value = '', options = {}) {
     minHeight: '100%',
     lang: lang,
     value,
-    theme: 'dark',
     mode: 'wysiwyg',
     cache: { enable: false },
     toolbar,

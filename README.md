@@ -21,7 +21,7 @@
 
 * open a markdown file
 * type`cmd-shift-p` to enter command mode
-* type`markdown-editor: Start markdown editor`
+* type`markdown-editor: Open markdown editor`
 
 ## Demo
 
@@ -31,6 +31,10 @@
 
 * [vscode](https://github.com/microsoft/vscode)
 * [vditor](https://github.com/Vanessa219/vditor)
+
+## Todo
+
+* [ ] Using [Custom Text Editor](https://code.visualstudio.com/api/extension-guides/custom-editors#custom-text-editor) ([demo](https://github.com/gera2ld/markmap-vscode))
 
 ## License
 
