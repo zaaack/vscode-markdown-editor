@@ -1,9 +1,9 @@
 {
   "name": "markdown-editor",
   "displayName": "Markdown Editor",
-  "icon": "./media/logo.png",
+  "icon": "media/logo.png",
   "description": "A full-featured WYSIWYG editor for markdown.",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "publisher": "zaaack",
   "private": true,
   "engines": {
