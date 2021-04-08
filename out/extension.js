@@ -44,25 +44,6 @@ class EditorPanel {
                 this._update();
             }, 500);
         }, this._disposables);
-        let panelChangeTimer;
-        // // Update the content based on view changes
-        // this._panel.onDidChangeViewState(
-        //   (e) => {
-        //     console.log(
-        //       'panelViewStateChange',
-        //       this._panel.visible,
-        //       this._panel.active
-        //     )
-        //     if (this._panel.active) {
-        //       panelChangeTimer && clearTimeout(panelChangeTimer)
-        //       panelChangeTimer = setTimeout(() => {
-        //           this._update()
-        //       }, 500)
-        //     }
-        //   },
-        //   null,
-        //   this._disposables
-        // )
         // Handle messages from the webview
         this._panel.webview.onDidReceiveMessage(async (message) => {
             console.log('msg from webview review', message);
@@ -79,9 +60,12 @@ class EditorPanel {
                     vscode.window.showInformationMessage(message.content);
                     break;
                 case 'edit': {
-                    const edit = new vscode.WorkspaceEdit();
-                    edit.replace(this._document.uri, new vscode.Range(0, 0, this._document.lineCount, 0), message.content);
-                    await vscode.workspace.applyEdit(edit);
+                    // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
+                    if (this._panel.active) {
+                        const edit = new vscode.WorkspaceEdit();
+                        edit.replace(this._document.uri, new vscode.Range(0, 0, this._document.lineCount, 0), message.content);
+                        await vscode.workspace.applyEdit(edit);
+                    }
                     break;
                 }
                 case 'save': {
@@ -118,12 +102,12 @@ class EditorPanel {
             return;
         }
         if (!vscode.window.activeTextEditor) {
-            vscode.window.showErrorMessage(`Cannot find markdown file!`);
+            vscode.window.showErrorMessage(`Did not open markdown file!`);
             return;
         }
         const doc = vscode.window.activeTextEditor.document;
         if (doc.languageId !== 'markdown') {
-            vscode.window.showErrorMessage(`Current file is not markdown:${doc.languageId}`);
+            vscode.window.showErrorMessage(`Current file language is not markdown, got ${doc.languageId}`);
             return;
         }
         // Otherwise, create a new panel.
@@ -144,7 +128,7 @@ class EditorPanel {
     _init() {
         const webview = this._panel.webview;
         this._panel.webview.html = this._getHtmlForWebview(webview);
-        this._panel.title = this._document.fileName;
+        this._panel.title = NodePath.basename(this._document.fileName);
     }
     // private fileToWebviewUri = (f: string) => {
     //   return this._panel.webview.asWebviewUri(vscode.Uri.file(f)).toString()

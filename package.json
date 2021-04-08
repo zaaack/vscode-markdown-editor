@@ -46,7 +46,7 @@
 		"compile": "tsc -p ./",
 		"lint": "eslint . --ext .ts,.tsx",
 		"watch": "tsc -w -p ./",
-		"publish": "vsce publish"
+		"pub": "vsce publish"
 	},
 	"dependencies": {},
 	"devDependencies": {

@@ -139,15 +139,6 @@ function fixPanelHover() {
   })
 }
 
-function handleEditEvent() {
-  let timer
-  vditor.vditor.element.addEventListener('input', (e) => {
-    timer && clearTimeout(timer)
-    timer = setTimeout(() => {
-      vscode.postMessage({ command: 'edit', content: vditor.getValue() })
-    }, 500)
-  })
-}
 const fileToBase64 = async (file) => {
   return new Promise((res, rej) => {
     const reader = new FileReader()
@@ -162,7 +153,7 @@ const fileToBase64 = async (file) => {
 function saveVditorOptions() {
   let vditorOptions = {
     theme: vditor.vditor.options.theme,
-    mode: vditor.vditor.options.mode,
+    mode: vditor.vditor.currentMode,
     preview: vditor.vditor.options.preview
   }
   vscode.postMessage({
@@ -180,6 +171,8 @@ function handleToolbarClick() {
 }
 
 function initVditor(value = '', options = {}) {
+  console.log('options', options)
+  let inputTimer
   vditor = new Vditor('vditor', {
     width: '100%',
     height: '100%',
@@ -195,8 +188,14 @@ function initVditor(value = '', options = {}) {
     after() {
       fixDarkTheme()
       fixPanelHover()
-      handleEditEvent()
       handleToolbarClick()
+    },
+    input() {
+
+      inputTimer && clearTimeout(inputTimer)
+      inputTimer = setTimeout(() => {
+        vscode.postMessage({ command: 'edit', content: vditor.getValue() })
+      }, 500)
     },
     upload: {
       url: '/fuzzy', // 没有 url 参数粘贴图片无法上传 see: https://github.com/Vanessa219/vditor/blob/d7628a0a7cfe5d28b055469bf06fb0ba5cfaa1b2/src/ts/util/fixBrowserBehavior.ts#L1409
