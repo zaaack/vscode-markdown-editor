@@ -19,9 +19,16 @@
 
 ## Usage
 
+### 1. Command mode in markdown file
+
 * open a markdown file
 * type`cmd-shift-p` to enter command mode
-* type`markdown-editor: Open markdown editor`
+* type`markdown-editor: Open with markdown editor`
+
+### 2. Context menu in explorer
+
+* right click on markdown file
+* then click `Open with markdown editor`
 
 ## Demo
 

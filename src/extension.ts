@@ -59,20 +59,21 @@ class EditorPanel {
       return
     }
     let doc = uri ? void 0 : vscode.window.activeTextEditor?.document
-    // 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
-    if (!doc || doc.languageId !== 'markdown') {
+    // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
+    if (uri) {
       console.log('visibleDocs', vscode.workspace.textDocuments.map(e => e.fileName))
       vscode.workspace.textDocuments.forEach((d) => {
         if (d.fileName === uri?.fsPath) {
           doc = d
         }
       })
-    }
-    if (doc && doc.languageId !== 'markdown') {
-      vscode.window.showErrorMessage(
-        `Current file language is not markdown, got ${doc.languageId}`
-      )
-      return
+    } else { // from command mode
+      if (doc && doc.languageId !== 'markdown') {
+        vscode.window.showErrorMessage(
+          `Current file language is not markdown, got ${doc.languageId}`
+        )
+        return
+      }
     }
 
     // Otherwise, create a new panel.
