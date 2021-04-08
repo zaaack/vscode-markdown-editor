@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title></title>
+	<link rel="stylesheet" href="./vditor/index.css">
+	<link rel="stylesheet" href="./main.css">
+</head>
+<body>
+	<div id="vditor"></div>
+	<script src="./vditor/index.min.js"></script>
+	<script src="./cash.min.js"></script>
+	<script src="./main.js"></script>
+	<script>
+		window.postMessage({
+			command: 'update',
+			content: `# test\n> aaa`
+		})
+	</script>
+</body>
+</html>

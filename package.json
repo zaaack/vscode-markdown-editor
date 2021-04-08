@@ -1,0 +1,59 @@
+{
+	"name": "markdown-editor",
+	"displayName": "Markdown Editor",
+	"description": "A full-featured WYSIWYG editor for markdown.",
+	"version": "0.0.1",
+	"publisher": "zaaack",
+	"private": true,
+	"engines": {
+		"vscode": "^1.47.0"
+	},
+	"categories": [
+		"Programming Languages",
+		"Other"
+	],
+	"keywords": [
+		"markdown",
+		"editor",
+		"wysiwyg",
+		"markdown-previewer",
+		"markdown-editor"
+	],
+	"activationEvents": [
+		"onCommand:markdown-editor.startEditor",
+		"onWebviewPanel:markdown-editor"
+	],
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/zaaack/vscode-markdown-editor.git"
+	},
+	"files": [
+		"./media",
+		"./out"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "markdown-editor.startEditor",
+				"title": "Start markdown editor",
+				"category": "markdown-editor"
+			}
+		]
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint . --ext .ts,.tsx",
+		"watch": "tsc -w -p ./"
+	},
+	"dependencies": {},
+	"devDependencies": {
+		"@types/node": "^12.12.0",
+		"@types/vscode": "^1.47.0",
+		"@typescript-eslint/eslint-plugin": "^4.16.0",
+		"@typescript-eslint/parser": "^4.16.0",
+		"eslint": "^7.21.0",
+		"typescript": "^4.2.2"
+	}
+}
