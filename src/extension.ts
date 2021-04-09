@@ -137,7 +137,8 @@ class EditorPanel {
       textEditTimer && clearTimeout(textEditTimer)
       textEditTimer = setTimeout(() => {
         this._update()
-      }, 500)
+        this._updateEditTitle()
+      }, 300)
     }, this._disposables)
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
@@ -185,6 +186,7 @@ class EditorPanel {
             // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
             if (this._panel.active) {
               await syncToEditor()
+              this._updateEditTitle()
             }
             break
           }
@@ -195,9 +197,7 @@ class EditorPanel {
           case 'save': {
             await syncToEditor()
             await this._document?.save()
-            vscode.window.showInformationMessage(
-              `${NodePath.basename(this._fsPath)} saved!`
-            )
+            this._updateEditTitle()
             break
           }
           case 'upload': {
@@ -247,6 +247,14 @@ class EditorPanel {
 
     this._panel.webview.html = this._getHtmlForWebview(webview)
     this._panel.title = NodePath.basename(this._fsPath)
+  }
+  private _isEdit = false
+  private _updateEditTitle() {
+    let isEdit = this._document?.isDirty ?? false
+    if (isEdit !== this._isEdit) {
+      this._isEdit = isEdit
+      this._panel.title = `${isEdit ? `[edit]`: ''}${NodePath.basename(this._fsPath)}`
+    }
   }
 
   // private fileToWebviewUri = (f: string) => {

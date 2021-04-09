@@ -10,7 +10,7 @@
 * Shortcut keys
 * Wysiwyg mode & split screen mode
 * Markdown extensions
-* Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(timing charts) / ...
+* Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
 * For more usage please see [vditor](https://github.com/Vanessa219/vditor)
 
 ## Support syntax
