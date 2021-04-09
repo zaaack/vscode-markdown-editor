@@ -22,7 +22,8 @@
   ],
   "activationEvents": [
     "onCommand:markdown-editor.openEditor",
-    "onWebviewPanel:markdown-editor"
+    "onWebviewPanel:markdown-editor",
+    "onLanguage:markdown"
   ],
   "repository": {
     "type": "git",
@@ -48,7 +49,13 @@
           "command": "markdown-editor.openEditor",
           "group": "navigation"
         }
-      ]
+      ],
+      "editor/title/context": [
+        {
+          "when": "resourceLangId == markdown",
+          "command": "markdown-editor.openEditor",
+          "group": "1_open"
+        }]
     }
   },
   "scripts": {

@@ -11,7 +11,7 @@
 * Wysiwyg mode & split screen mode
 * Markdown extensions
 * Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(timing charts) / ...
-* For more usage please see[vditor](https://github.com/Vanessa219/vditor)
+* For more usage please see [vditor](https://github.com/Vanessa219/vditor)
 
 ## Support syntax
 
@@ -25,9 +25,14 @@
 * type`cmd-shift-p` to enter command mode
 * type`markdown-editor: Open with markdown editor`
 
-### 2. Context menu in explorer
+### 2. Explorer Context menu
 
 * right click on markdown file
+* then click `Open with markdown editor`
+
+### 3. Editor title context menu
+
+* right click on a opened markdown file's tab title
 * then click `Open with markdown editor`
 
 ## Demo

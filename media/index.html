@@ -10,13 +10,20 @@
 </head>
 <body>
 	<div id="vditor"></div>
+	<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/dist/jquery-confirm.min.js"></script>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.css">
+
 	<script src="./vditor/index.min.js"></script>
-	<script src="./cash.min.js"></script>
+
 	<script src="./main.js"></script>
 	<script>
 		window.postMessage({
 			command: 'update',
-			content: `# test\n> aaa`
+			content: `# test\n> aaa`,
+			theme: 'dark',
+			type: 'init'
 		})
 	</script>
 </body>

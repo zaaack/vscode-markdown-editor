@@ -43,3 +43,9 @@ body,
 .vditor-reset {
   padding-left: 35px !important;
 }
+.jconfirm {
+  color: black;
+}
+.jconfirm-buttons button {
+  text-transform: none!important;
+}

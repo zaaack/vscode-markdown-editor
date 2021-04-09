@@ -1,16 +1,22 @@
 import * as vscode from 'vscode'
 import * as NodePath from 'path'
 const KeyVditorOptions = 'vditor.options'
+
+function debug(...args: any[]) {
+  console.log(...args)
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
       'markdown-editor.openEditor',
       (uri?: vscode.Uri, ...args) => {
-        console.log('command', uri, args)
+        debug('command', uri, args)
         EditorPanel.createOrShow(context, uri)
       }
     )
   )
+
   context.globalState.setKeysForSync([KeyVditorOptions])
 }
 
@@ -38,7 +44,7 @@ class EditorPanel {
 
   private _disposables: vscode.Disposable[] = []
 
-  public static createOrShow(
+  public static async createOrShow(
     context: vscode.ExtensionContext,
     uri?: vscode.Uri
   ) {
@@ -61,13 +67,10 @@ class EditorPanel {
     let doc = uri ? void 0 : vscode.window.activeTextEditor?.document
     // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
     if (uri) {
-      console.log('visibleDocs', vscode.workspace.textDocuments.map(e => e.fileName))
-      vscode.workspace.textDocuments.forEach((d) => {
-        if (d.fileName === uri?.fsPath) {
-          doc = d
-        }
-      })
-    } else { // from command mode
+      // 从右键打开文件，先打开文档然后开启自动同步，不然没法保存文件和同步到已经打开的document
+      doc = await vscode.workspace.openTextDocument(uri)
+    } else {
+      // from command mode
       if (doc && doc.languageId !== 'markdown') {
         vscode.window.showErrorMessage(
           `Current file language is not markdown, got ${doc.languageId}`
@@ -139,9 +142,10 @@ class EditorPanel {
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
-        console.log('msg from webview review', message)
+        debug('msg from webview review', message, this._panel.active)
 
         const syncToEditor = async () => {
+          debug('sync to editor', this._document, this._uri)
           if (this._document) {
             const edit = new vscode.WorkspaceEdit()
             edit.replace(
@@ -159,7 +163,13 @@ class EditorPanel {
         switch (message.command) {
           case 'ready':
             this._update({
+              type: 'init',
               options: this._context.globalState.get(KeyVditorOptions),
+              theme:
+                vscode.window.activeColorTheme.kind ===
+                vscode.ColorThemeKind.Dark
+                  ? 'dark'
+                  : 'light',
             })
             break
           case 'save-options':
@@ -168,6 +178,9 @@ class EditorPanel {
           case 'info':
             vscode.window.showInformationMessage(message.content)
             break
+          case 'error':
+            vscode.window.showErrorMessage(message.content)
+            break
           case 'edit': {
             // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
             if (this._panel.active) {
@@ -175,10 +188,16 @@ class EditorPanel {
             }
             break
           }
+          case 'reset-config': {
+            await this._context.globalState.update(KeyVditorOptions, {})
+            break
+          }
           case 'save': {
             await syncToEditor()
             await this._document?.save()
-            vscode.window.showInformationMessage(`${NodePath.basename(this._fsPath)} saved!`)
+            vscode.window.showInformationMessage(
+              `${NodePath.basename(this._fsPath)} saved!`
+            )
             break
           }
           case 'upload': {
@@ -234,7 +253,13 @@ class EditorPanel {
   //   return this._panel.webview.asWebviewUri(vscode.Uri.file(f)).toString()
   // }
 
-  private async _update({ options } = { options: void 0 }) {
+  private async _update(
+    props: {
+      type?: 'init' | 'update'
+      options?: any
+      theme?: 'dark' | 'light'
+    } = { options: void 0 }
+  ) {
     let md = this._document
       ? this._document.getText()
       : (await vscode.workspace.fs.readFile(this._uri!)).toString()
@@ -242,7 +267,7 @@ class EditorPanel {
     this._panel.webview.postMessage({
       command: 'update',
       content: md,
-      options,
+      ...props,
     })
   }
 
@@ -255,7 +280,6 @@ class EditorPanel {
       ) + '/'
     const JsFiles = [
       'media/vditor/index.min.js',
-      'media/cash.min.js',
       'media/main.js',
     ].map(toUri)
     const CssFiles = ['media/vditor/index.css', 'media/main.css'].map(toUri)
@@ -273,6 +297,13 @@ class EditorPanel {
 			</head>
 			<body>
 				<div id="vditor"></div>
+
+        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
+
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/dist/jquery-confirm.min.js"></script>
+	      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.css">
+
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
 			</body>
 			</html>`
