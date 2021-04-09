@@ -3,7 +3,7 @@
   "displayName": "Markdown Editor",
   "icon": "media/logo.png",
   "description": "A full-featured WYSIWYG editor for markdown.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "zaaack",
   "private": true,
   "engines": {
@@ -55,7 +55,8 @@
           "when": "resourceLangId == markdown",
           "command": "markdown-editor.openEditor",
           "group": "1_open"
-        }]
+        }
+      ]
     }
   },
   "scripts": {
