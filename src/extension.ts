@@ -250,10 +250,12 @@ class EditorPanel {
   }
   private _isEdit = false
   private _updateEditTitle() {
-    let isEdit = this._document?.isDirty ?? false
+    const isEdit = this._document?.isDirty ?? false
     if (isEdit !== this._isEdit) {
       this._isEdit = isEdit
-      this._panel.title = `${isEdit ? `[edit]`: ''}${NodePath.basename(this._fsPath)}`
+      this._panel.title = `${isEdit ? `[edit]` : ''}${NodePath.basename(
+        this._fsPath
+      )}`
     }
   }
 
@@ -268,7 +270,7 @@ class EditorPanel {
       theme?: 'dark' | 'light'
     } = { options: void 0 }
   ) {
-    let md = this._document
+    const md = this._document
       ? this._document.getText()
       : (await vscode.workspace.fs.readFile(this._uri!)).toString()
     // const dir = NodePath.dirname(this._document.fileName)
@@ -286,10 +288,7 @@ class EditorPanel {
       NodePath.dirname(
         webview.asWebviewUri(vscode.Uri.file(this._fsPath)).toString()
       ) + '/'
-    const JsFiles = [
-      'media/vditor/index.min.js',
-      'media/main.js',
-    ].map(toUri)
+    const JsFiles = ['media/vditor/index.min.js', 'media/main.js'].map(toUri)
     const CssFiles = ['media/vditor/index.css', 'media/main.css'].map(toUri)
 
     return `<!DOCTYPE html>

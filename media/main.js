@@ -1,3 +1,6 @@
+
+/*eslint-env browser*/
+/* global $,acquireVsCodeApi, _,Vditor */
 let vditor
 const vscode = window.acquireVsCodeApi && acquireVsCodeApi()
 
@@ -48,7 +51,6 @@ function confirm(msg, onOk) {
     buttons: {
       cancel: {
         text: 'Cancel',
-        action: function () {}
       },
       confirm: {
         text: 'Confirm',
