@@ -1,5 +1,7 @@
 # Markdown Editor — A full-featured WYSIWYG editor for markdown
 
+![](https://vsmarketplacebadge.apphb.com/version-short/zaaack.markdown-editor.svg) ![](https://vsmarketplacebadge.apphb.com/installs-short/zaaack.markdown-editor.svg) ![](https://vsmarketplacebadge.apphb.com/downloads-short/zaaack.markdown-editor.svg) ![](https://vsmarketplacebadge.apphb.com/rating-short/zaaack.markdown-editor.svg)
+
 ## Features
 
 * What You See Is What You Get (WYSIWYG)
