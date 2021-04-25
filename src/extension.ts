@@ -52,7 +52,7 @@ class EditorPanel {
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined
-    if (uri && EditorPanel.currentPanel) {
+    if (EditorPanel.currentPanel && uri !== EditorPanel.currentPanel?._uri) {
       EditorPanel.currentPanel.dispose()
     }
     // If we already have a panel, show it.
@@ -64,12 +64,13 @@ class EditorPanel {
       vscode.window.showErrorMessage(`Did not open markdown file!`)
       return
     }
-    let doc = uri ? void 0 : vscode.window.activeTextEditor?.document
+    let doc: undefined | vscode.TextDocument
     // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
     if (uri) {
       // 从右键打开文件，先打开文档然后开启自动同步，不然没法保存文件和同步到已经打开的document
       doc = await vscode.workspace.openTextDocument(uri)
     } else {
+      doc = vscode.window.activeTextEditor?.document
       // from command mode
       if (doc && doc.languageId !== 'markdown') {
         vscode.window.showErrorMessage(
@@ -77,6 +78,11 @@ class EditorPanel {
         )
         return
       }
+    }
+
+    if (!doc && !uri) {
+      vscode.window.showErrorMessage(`Cannot find markdown file!`)
+      return
     }
 
     // Otherwise, create a new panel.
@@ -288,8 +294,9 @@ class EditorPanel {
       NodePath.dirname(
         webview.asWebviewUri(vscode.Uri.file(this._fsPath)).toString()
       ) + '/'
-    const JsFiles = ['media/vditor/index.min.js', 'media/main.js'].map(toUri)
-    const CssFiles = ['media/vditor/index.css', 'media/main.css'].map(toUri)
+    const toMediaPath = (f: string )=> `media/dist/${f}`
+    const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
+    const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
 
     return `<!DOCTYPE html>
 			<html lang="en">
@@ -298,18 +305,15 @@ class EditorPanel {
 
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<base href="${baseHref}" />
+
+
 				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
 
-				<title>Cat Coding</title>
+				<title>markdown editor</title>
 			</head>
 			<body>
-				<div id="vditor"></div>
+				<div id="app"></div>
 
-        <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
-
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/dist/jquery-confirm.min.js"></script>
-	      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.css">
 
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
 			</body>

@@ -1,30 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title></title>
-	<link rel="stylesheet" href="./vditor/index.css">
-	<link rel="stylesheet" href="./main.css">
-</head>
-<body>
-	<div id="vditor"></div>
-	<script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/dist/jquery-confirm.min.js"></script>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>markdown editor</title>
 
-	<script src="./vditor/index.min.js"></script>
+    <!-- <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/vditor@3.8.4/dist/index.css"
+    /> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vditor@3.8.4/dist/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
 
-	<script src="./main.js"></script>
-	<script>
-		window.postMessage({
-			command: 'update',
-			content: `# test\n> aaa`,
-			theme: 'dark',
-			type: 'init'
-		})
-	</script>
-</body>
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/dist/jquery-confirm.min.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.css"
+    /> -->
+    <link rel="stylesheet" href="./dist/main.css" />
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="./dist/main.js"></script>
+    <script>
+      window.postMessage(
+        {
+          command: 'update',
+          content: `# test
+
+> aaa
+
+| col1 | col2 | col3 |
+| ---- | ---- | ---- |
+|      |   aaaaaaaaa   |      |
+|      |      |      |`,
+          theme: 'dark',
+          type: 'init',
+        },
+        '*'
+      )
+      let timer = setTimeout(() => {
+        vditor.vditor.ir.element.addEventListener('keydown', (e) =>
+          console.log('vkd', e)
+        )
+        let ev = new KeyboardEvent('keydown', {
+          key: '=',
+          code: 'Equal',
+          keyCode: 187,
+          metaKey: true,
+        })
+        vditor.vditor.ir.element.dispatchEvent(ev)
+      }, 3000)
+    </script>
+  </body>
 </html>

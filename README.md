@@ -10,7 +10,7 @@
 * Upload/paste/drag-drop images will auto save to `assets` folder
 * Multi-theme support
 * Shortcut keys
-* Wysiwyg mode & split screen mode
+* Instant Rendering mode(**Recommand!**) & Wysiwyg mode & split screen mode
 * Markdown extensions
 * Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
 * For more usage please see [vditor](https://github.com/Vanessa219/vditor)
