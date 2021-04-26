@@ -80,7 +80,7 @@ class EditorPanel {
       }
     }
 
-    if (!doc && !uri) {
+    if (!doc) {
       vscode.window.showErrorMessage(`Cannot find markdown file!`)
       return
     }
@@ -103,15 +103,15 @@ class EditorPanel {
   }
 
   private get _fsPath() {
-    return (this._document?.uri ?? this._uri!).fsPath
+    return this._uri.fsPath
   }
 
   private constructor(
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
     private readonly _extensionUri: vscode.Uri,
-    public _document?: vscode.TextDocument, // 当前有 markdown 编辑器
-    public _uri = _document?.uri // 从资源管理器打开，只有 uri 没有 _document
+    public _document: vscode.TextDocument, // 当前有 markdown 编辑器
+    public _uri = _document.uri // 从资源管理器打开，只有 uri 没有 _document
   ) {
     // Set the webview's initial html content
 
@@ -121,22 +121,19 @@ class EditorPanel {
     // This happens when the user closes the panel or when the panel is closed programmatically
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
     let textEditTimer: NodeJS.Timeout | void
-    // 有文件打开时更新 _document
-    vscode.workspace.onDidOpenTextDocument((e) => {
-      if (e.fileName === this._fsPath) {
-        this._document = e
-      }
-    }, this._disposables)
+    // close EditorPanel when vsc editor is close
     vscode.workspace.onDidCloseTextDocument((e) => {
       if (e.fileName === this._fsPath) {
-        this._document = void 0
+        this.dispose()
       }
     }, this._disposables)
+    // update EditorPanel when vsc editor changes
     vscode.workspace.onDidChangeTextDocument((e) => {
-      if (e.document.fileName !== this._document?.fileName) {
+      if (e.document.fileName !== this._document.fileName) {
         return
       }
       // 当 webview panel 激活时不将由 webview编辑导致的 vsc 编辑器更新同步回 webview
+      // don't change webview panel when webview panel is focus
       if (this._panel.active) {
         return
       }
@@ -202,7 +199,7 @@ class EditorPanel {
           }
           case 'save': {
             await syncToEditor()
-            await this._document?.save()
+            await this._document.save()
             this._updateEditTitle()
             break
           }
@@ -256,7 +253,7 @@ class EditorPanel {
   }
   private _isEdit = false
   private _updateEditTitle() {
-    const isEdit = this._document?.isDirty ?? false
+    const isEdit = this._document.isDirty
     if (isEdit !== this._isEdit) {
       this._isEdit = isEdit
       this._panel.title = `${isEdit ? `[edit]` : ''}${NodePath.basename(
@@ -278,7 +275,7 @@ class EditorPanel {
   ) {
     const md = this._document
       ? this._document.getText()
-      : (await vscode.workspace.fs.readFile(this._uri!)).toString()
+      : (await vscode.workspace.fs.readFile(this._uri)).toString()
     // const dir = NodePath.dirname(this._document.fileName)
     this._panel.webview.postMessage({
       command: 'update',
@@ -294,7 +291,7 @@ class EditorPanel {
       NodePath.dirname(
         webview.asWebviewUri(vscode.Uri.file(this._fsPath)).toString()
       ) + '/'
-    const toMediaPath = (f: string )=> `media/dist/${f}`
+    const toMediaPath = (f: string) => `media/dist/${f}`
     const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
     const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
 

@@ -1,6 +1,11 @@
 # Markdown Editor — A full-featured WYSIWYG editor for markdown
 
-![](https://vsmarketplacebadge.apphb.com/version-short/zaaack.markdown-editor.svg) ![](https://vsmarketplacebadge.apphb.com/installs-short/zaaack.markdown-editor.svg) ![](https://vsmarketplacebadge.apphb.com/downloads-short/zaaack.markdown-editor.svg) ![](https://vsmarketplacebadge.apphb.com/rating-short/zaaack.markdown-editor.svg)
+[![](https://vsmarketplacebadge.apphb.com/version-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/installs-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/downloads-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/rating-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
+
+
+## Demo
+
+![demo](./demo.gif)
 
 ## Features
 
@@ -17,7 +22,7 @@
 
 ## Install
 
-<https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor>
+[https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
 
 ## Support syntax
 
@@ -40,10 +45,6 @@
 
 * right click on a opened markdown file's tab title
 * then click `Open with markdown editor`
-
-## Demo
-
-![demo](./demo.gif)
 
 ## Acknowledgement
 
