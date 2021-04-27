@@ -1,0 +1,11 @@
+.vscode
+src/
+media-src
+node_modules
+tsconfig.json
+webpack.config.js
+.eslint
+*.log
+*.map
+*.vsix
+demo.gif
