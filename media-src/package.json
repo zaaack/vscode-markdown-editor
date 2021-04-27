@@ -20,6 +20,7 @@
     "@babel/runtime-corejs3": "^7.13.17",
     "@testing-library/dom": "^7.30.4",
     "@testing-library/user-event": "^13.1.5",
+    "date-fns": "^2.21.1",
     "esbuild": "^0.11.14",
     "jquery": "^3.6.0",
     "jquery-confirm": "^3.3.4",

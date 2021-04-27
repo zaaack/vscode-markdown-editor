@@ -6,8 +6,9 @@ import {
   saveVditorOptions,
 } from './utils'
 
-import _ from 'lodash'
+import { merge } from 'lodash'
 import Vditor from 'vditor'
+import { format } from 'date-fns'
 import 'vditor/dist/index.css'
 import { t, lang } from './lang'
 import { toolbar } from './toolbar'
@@ -27,7 +28,7 @@ function initVditor(msg) {
       },
     }
   }
-  defaultOptions = _.merge(defaultOptions, msg.options)
+  defaultOptions = merge(defaultOptions, msg.options)
   // console.log('defaultOptions', defaultOptions, 'msg.options', msg.options)
   if (window.vditor) {
     vditor.destroy()
@@ -62,10 +63,11 @@ function initVditor(msg) {
         // console.log('files', files)
         let fileInfos = await Promise.all(
           files.map(async (f) => {
+            const d = new Date()
             return {
               base64: await fileToBase64(f),
-              name: `${Math.random().toString(36).slice(2)}_${f.name}`.replace(
-                /[^\w_]+/,
+              name: `${format(new Date(), 'yyyyMMdd_HHmmss')}_${f.name}`.replace(
+                /[^\w-_.]+/,
                 '_'
               ),
             }

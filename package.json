@@ -17,6 +17,7 @@
     "markdown",
     "editor",
     "wysiwyg",
+    "typora",
     "markdown-previewer",
     "markdown-editor"
   ],
@@ -57,6 +58,16 @@
           "group": "1_open"
         }
       ]
+    },
+    "configuration": {
+      "title": "markdown-editor",
+      "properties": {
+        "markdown-editor.imageSaveFolder": {
+          "type": "string",
+          "default": "assets",
+          "description": "Save images to which folder when upload in markdown, default relative to the markdown file, you can set to project root via `${projectRoot}/assets`."
+        }
+      }
     }
   },
   "scripts": {

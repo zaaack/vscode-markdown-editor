@@ -106,6 +106,10 @@ class EditorPanel {
     return this._uri.fsPath
   }
 
+  private get _config() {
+    return vscode.workspace.getConfiguration('markdown-editor')
+  }
+
   private constructor(
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
@@ -144,6 +148,12 @@ class EditorPanel {
       }, 300)
     }, this._disposables)
     // Handle messages from the webview
+    const imageSaveFolder = (
+      this._config.get<string>('imageSaveFolder') || 'assets'
+    ).replace(
+      '${projectRoot}',
+      vscode.workspace.getWorkspaceFolder(this._uri)?.uri.fsPath || ''
+    )
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
         debug('msg from webview review', message, this._panel.active)
@@ -204,20 +214,25 @@ class EditorPanel {
             break
           }
           case 'upload': {
-            const assetsFolder = NodePath.join(
+            const assetsFolder = NodePath.resolve(
               NodePath.dirname(this._fsPath),
-              'assets'
+              imageSaveFolder
             )
             await Promise.all(
-              message.files.map(async (finfo: any) => {
-                const f = Buffer.from(finfo.base64, 'base64')
+              message.files.map(async (f: any) => {
+                const content = Buffer.from(f.base64, 'base64')
                 return vscode.workspace.fs.writeFile(
-                  vscode.Uri.file(NodePath.join(assetsFolder, finfo.name)),
-                  f
+                  vscode.Uri.file(NodePath.join(assetsFolder, f.name)),
+                  content
                 )
               })
             )
-            const files = message.files.map((f: any) => `./assets/${f.name}`)
+            const files = message.files.map((f: any) =>
+              NodePath.relative(
+                NodePath.dirname(this._fsPath),
+                NodePath.join(assetsFolder, f.name)
+              )
+            )
             this._panel.webview.postMessage({
               command: 'uploaded',
               files,

@@ -184,6 +184,11 @@ core-js-pure@^3.0.0:
   resolved "https://registry.nlark.com/core-js-pure/download/core-js-pure-3.11.0.tgz?cache=0&sync_timestamp=1619088762044&other_urls=https%3A%2F%2Fregistry.nlark.com%2Fcore-js-pure%2Fdownload%2Fcore-js-pure-3.11.0.tgz#e07f25a8f616d178ec16b0354b008ad28b20b2f0"
   integrity sha1-4H8lqPYW0XjsFrA1SwCK0osgsvA=
 
+date-fns@^2.21.1:
+  version "2.21.1"
+  resolved "https://registry.npm.taobao.org/date-fns/download/date-fns-2.21.1.tgz?cache=0&sync_timestamp=1618472696235&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fdate-fns%2Fdownload%2Fdate-fns-2.21.1.tgz#679a4ccaa584c0706ea70b3fa92262ac3009d2b0"
+  integrity sha1-Z5pMyqWEwHBupws/qSJirDAJ0rA=
+
 diff-match-patch@^1.0.5:
   version "1.0.5"
   resolved "https://registry.npm.taobao.org/diff-match-patch/download/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
