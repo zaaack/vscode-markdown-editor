@@ -1,3 +1,6 @@
+/**
+ * ir 模式下支持 table 编辑
+ */
 import { keyboard } from '@testing-library/user-event/dist/keyboard'
 import $ from 'jquery'
 

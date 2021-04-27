@@ -38,7 +38,7 @@ export function confirm(msg, onOk) {
     },
   })
 }
-
+// 切换 content-theme 时自动修改 vditor theme
 export function fixDarkTheme() {
   let $ct = document.querySelector('[data-type="content-theme"]')
   $ct.nextElementSibling.addEventListener('click', (e) => {
@@ -51,7 +51,7 @@ export function fixDarkTheme() {
     }
   })
 }
-
+// panel hover 加定时延迟
 export function fixPanelHover() {
   $('.vditor-panel').each((i, e) => {
     let timer
@@ -68,7 +68,7 @@ export function fixPanelHover() {
       })
   })
 }
-
+// 文件转base64用于传输
 export const fileToBase64 = async (file) => {
   return new Promise((res, rej) => {
     const reader = new FileReader()
@@ -79,7 +79,7 @@ export const fileToBase64 = async (file) => {
     reader.readAsDataURL(file)
   })
 }
-
+// 保存 vditor 配置到 vscode 同步存储
 export function saveVditorOptions() {
   let vditorOptions = {
     theme: vditor.vditor.options.theme,
@@ -91,7 +91,7 @@ export function saveVditorOptions() {
     options: vditorOptions,
   })
 }
-
+// toolbar 点击时保存配置
 export function handleToolbarClick() {
   $(
     '.vditor-toolbar .vditor-panel--left button, .vditor-toolbar .vditor-panel--arrow button'

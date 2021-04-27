@@ -9,3 +9,4 @@ webpack.config.js
 *.map
 *.vsix
 demo.gif
+.gitignore
