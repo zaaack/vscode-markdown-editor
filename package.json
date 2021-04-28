@@ -89,7 +89,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "watch": "yarn start",
     "start": "tsc -w -p ./",
-    "pub": "vsce publish"
+    "pub": "vsce publish",
+    "test": "echo 0"
   },
   "dependencies": {},
   "devDependencies": {
