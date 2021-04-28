@@ -1,6 +1,6 @@
 # Markdown Editor — A full-featured WYSIWYG editor for markdown
 
-[![](https://vsmarketplacebadge.apphb.com/version-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/installs-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/downloads-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/rating-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
+[![Deploy Extension](https://github.com/zaaack/vscode-markdown-editor/actions/workflows/main.yml/badge.svg)](https://github.com/zaaack/vscode-markdown-editor/actions/workflows/main.yml) [![](https://vsmarketplacebadge.apphb.com/version-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/installs-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/downloads-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/rating-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
 
 ## Demo
 
@@ -63,3 +63,8 @@
 ## License
 
 MIT
+
+## Support
+
+If you like this extension make sure to star the repo. I am always looking for new ideas and feedback.
+In addition, it is possible to [donate via paypal](https://www.paypal.me/zaaack).
