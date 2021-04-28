@@ -178,7 +178,10 @@ class EditorPanel {
           case 'ready':
             this._update({
               type: 'init',
-              options: this._context.globalState.get(KeyVditorOptions),
+              options: {
+                useVscodeThemeColor: this._config.get<boolean>('useVscodeThemeColor'),
+                ...this._context.globalState.get(KeyVditorOptions),
+              },
               theme:
                 vscode.window.activeColorTheme.kind ===
                 vscode.ColorThemeKind.Dark

@@ -88,12 +88,17 @@ window.addEventListener('message', (e) => {
   switch (msg.command) {
     case 'update': {
       if (msg.type === 'init') {
+        if (msg.options && msg.options.useVscodeThemeColor) {
+          document.body.setAttribute('data-use-vscode-theme-color', '1')
+        } else {
+          document.body.setAttribute('data-use-vscode-theme-color', '0')
+        }
         try {
           initVditor(msg)
         } catch (error) {
           // reset options when error
           console.error(error)
-          initVditor(msg.content)
+          initVditor({content: msg.content})
           saveVditorOptions()
         }
         console.log('initVditor')

@@ -6,11 +6,30 @@ body {
 }
 html,
 body,
-#vditor {
+#app {
   height: 100%;
   width: 100%;
 }
-
+body[data-use-vscode-theme-color="1"] .vditor {
+  --panel-background-color: var(--vscode-editor-background);
+  --toolbar-background-color: var(--vscode-editor-background);
+  --textarea-background-color: var(--vscode-editor-background);
+}
+/* fix font family */
+.vditor .vditor-reset {
+  font-family: var(--vscode-editor-font-family)!important;
+}
+/* fix code block color in dark mode */
+.vditor--dark .vditor-reset code:not(.hljs):not(.highlight-chroma) {
+  background-color: rgba(66,133,244,.1);
+}
+/* fix outline toolbar padding */
+.vditor-toolbar.vditor-toolbar--pin {
+  padding-left: 35px!important;
+}
+.vditor-ir pre.vditor-reset {
+  position: relative;
+}
 .vditor-panel {
   transform: translate(-25px, 0);
   max-width: 21px;

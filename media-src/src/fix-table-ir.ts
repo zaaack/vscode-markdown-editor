@@ -36,7 +36,7 @@ const updateHotkeyTip = (hotkey) => {
 export function fixTableIr() {
   if (!tablePanel) {
     tablePanel = document.createElement('div')
-    vditor.vditor.element.appendChild(tablePanel)
+    vditor.vditor.ir.element.appendChild(tablePanel)
     tablePanel.innerHTML = `<div
     class="vditor-panel vditor-panel--none vditor-panel-ir"
     data-top="73"
@@ -172,8 +172,9 @@ export function fixTableIr() {
     }
 
     tablePanel.style.top =
-      clickEl.getBoundingClientRect().top +
-      (vditor.vditor.ir.element.scrollTop || window.scrollY) -
+      clickEl.getBoundingClientRect().top -
+      vditor.vditor.ir.element.getBoundingClientRect().top +
+      vditor.vditor.ir.element.scrollTop -
       25 +
       'px'
   })

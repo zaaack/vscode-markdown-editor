@@ -66,15 +66,30 @@
           "type": "string",
           "default": "assets",
           "description": "Save images to which folder when upload in markdown, default relative to the markdown file, you can set to project root via `${projectRoot}/assets`."
+        },
+        "markdown-editor.useVscodeThemeColor": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use vscode theme's background color as the markdown editor's background color."
         }
       }
-    }
+    },
+
+    "keybindings": [
+      {
+        "key": "ctrl+shift+alt+m",
+        "command": "markdown-editor.openEditor",
+        "mac": "cmd+shift+alt+m",
+        "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn compile; cd ./media-src; yarn build",
     "compile": "tsc -p ./",
     "lint": "eslint . --ext .ts,.tsx",
-    "watch": "tsc -w -p ./",
+    "watch": "yarn start",
+    "start": "tsc -w -p ./",
     "pub": "vsce publish"
   },
   "dependencies": {},

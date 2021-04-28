@@ -2,7 +2,6 @@
 
 [![](https://vsmarketplacebadge.apphb.com/version-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/installs-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/downloads-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor) [![](https://vsmarketplacebadge.apphb.com/rating-short/zaaack.markdown-editor.svg)](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
 
-
 ## Demo
 
 ![demo](./demo.gif)
@@ -36,15 +35,21 @@
 * type `cmd-shift-p` to enter command mode
 * type `markdown-editor: Open with markdown editor`
 
-### 2. Explorer Context menu
+### 2. Key bindings
+
+* open a markdown file
+* type `ctrl+shift+alt+m` for win or `cmd+shift+alt+m` for mac
+
+### 3. Explorer Context menu
 
 * right click on markdown file
 * then click `Open with markdown editor`
 
-### 3. Editor title context menu
+### 4. Editor title context menu
 
 * right click on a opened markdown file's tab title
 * then click `Open with markdown editor`
+
 
 ## Acknowledgement
 
