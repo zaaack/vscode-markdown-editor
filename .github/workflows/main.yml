@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 14
       - name: Install
-        run: yarn
+        run: yarn; cd ./media-src; yarn
       - name: Test
         run: npm test
       - name: Publish to Open VSX Registry
