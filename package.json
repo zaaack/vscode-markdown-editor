@@ -3,7 +3,7 @@
   "displayName": "Markdown Editor",
   "icon": "media/logo.png",
   "description": "A full-featured WYSIWYG editor for markdown.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "zaaack",
   "private": true,
   "engines": {
@@ -74,7 +74,6 @@
         }
       }
     },
-
     "keybindings": [
       {
         "key": "ctrl+shift+alt+m",
