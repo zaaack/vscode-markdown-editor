@@ -47,6 +47,7 @@ body[data-use-vscode-theme-color="1"] .vditor {
   background-color: white;
   color: black;
   text-align: center;
+  font-family: none;
 }
 .vditor-panel:hover,
 .vditor-panel_hover {

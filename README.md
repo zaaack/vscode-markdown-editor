@@ -50,7 +50,6 @@
 * right click on a opened markdown file's tab title
 * then click `Open with markdown editor`
 
-
 ## Acknowledgement
 
 * [vscode](https://github.com/microsoft/vscode)

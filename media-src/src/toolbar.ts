@@ -44,9 +44,10 @@ export const toolbar = [
 	'undo',
 	'redo',
 	'|',
-	'edit-mode',
+	{name:'edit-mode', tipPosition: 'e',},
 	{
 	  name: 'more',
+	  tipPosition: 'e',
 	  toolbar: [
 		'both',
 		'code-theme',
@@ -123,6 +124,6 @@ export const toolbar = [
 	if (typeof it === 'string') {
 	  it = { name: it }
 	}
-	it.tipPosition = 's'
+	it.tipPosition = it.tipPosition || 's'
 	return it
   })

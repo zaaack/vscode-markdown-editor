@@ -26,6 +26,7 @@ export const lang = (() => {
   if (!Langs[l]) {
     l = 'en_US'
   }
+  return 'en_US'
   return l
 })()
 
