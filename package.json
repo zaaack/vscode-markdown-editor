@@ -85,10 +85,11 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn foy build",
+    "preversion": "yarn foy build",
     "lint": "eslint . --ext .ts,.tsx",
     "watch": "yarn foy watch",
     "start": "yarn foy watch",
-    "pub": "vsce publish",
+    "pub": "npm version patch; git push origin master --tags",
     "test": "echo 0"
   },
   "dependencies": {},
