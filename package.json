@@ -84,11 +84,10 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn compile; cd ./media-src; yarn build",
-    "compile": "tsc -p ./",
+    "vscode:prepublish": "yarn foy build",
     "lint": "eslint . --ext .ts,.tsx",
-    "watch": "yarn start",
-    "start": "tsc -w -p ./",
+    "watch": "yarn foy watch",
+    "start": "yarn foy watch",
     "pub": "vsce publish",
     "test": "echo 0"
   },
@@ -99,6 +98,8 @@
     "@typescript-eslint/eslint-plugin": "^4.16.0",
     "@typescript-eslint/parser": "^4.16.0",
     "eslint": "^7.21.0",
+    "foy": "^0.2.5",
+    "ts-node": "^9.1.1",
     "typescript": "^4.2.2"
   }
 }

@@ -21,15 +21,22 @@ function initVditor(msg) {
   let defaultOptions: any = {}
   if (msg.theme === 'dark') {
     // vditor.setTheme('dark', 'dark')
-    defaultOptions.theme = 'dark'
-    defaultOptions.preview = {
-      theme: {
-        current: 'dark',
-      },
-    }
+    defaultOptions = merge(defaultOptions, {
+      theme: 'dark',
+      preview: {
+        theme: {
+          current: 'dark',
+        },
+      }
+    })
   }
-  defaultOptions = merge(defaultOptions, msg.options)
-  // console.log('defaultOptions', defaultOptions, 'msg.options', msg.options)
+  defaultOptions = merge(defaultOptions, msg.options, {
+    preview: {
+      math: {
+        inlineDigit: true,
+      }
+    }
+  })
   if (window.vditor) {
     vditor.destroy()
     window.vditor = null
