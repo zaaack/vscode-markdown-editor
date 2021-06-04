@@ -101,3 +101,19 @@ export function handleToolbarClick() {
     }, 500)
   })
 }
+
+export function fixLinkClick() {
+  const openLink = (url: string) => {
+    vscode.postMessage({ command: 'open-link', href: url })
+  }
+  document.addEventListener('click', e=> {
+    let el = e.target as HTMLAnchorElement
+    if (el.tagName === 'A' && el.href.startsWith('http')) {
+      openLink(el.href)
+    }
+  })
+  window.open = (url: string, ...args: any[]) => {
+    openLink(url)
+    return window
+  }
+}

@@ -1,6 +1,7 @@
 import {
   fileToBase64,
   fixDarkTheme,
+  fixLinkClick,
   fixPanelHover,
   handleToolbarClick,
   saveVditorOptions,
@@ -139,4 +140,5 @@ window.addEventListener('message', (e) => {
   }
 })
 
+fixLinkClick()
 vscode.postMessage({ command: 'ready' })

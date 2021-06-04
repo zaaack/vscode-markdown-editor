@@ -242,6 +242,10 @@ class EditorPanel {
             })
             break
           }
+          case 'open-link': {
+            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(message.href));
+            break
+          }
         }
       },
       null,
