@@ -243,7 +243,11 @@ class EditorPanel {
             break
           }
           case 'open-link': {
-            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(message.href));
+            let url = message.href
+            if (!/^http/.test(url)) {
+              url = NodePath.resolve(this._fsPath, '..', url)
+            }
+            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
             break
           }
         }

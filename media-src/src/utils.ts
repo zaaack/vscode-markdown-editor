@@ -1,3 +1,4 @@
+import { keyboard } from '@testing-library/user-event/dist/keyboard'
 import $ from 'jquery'
 require('jquery-confirm')(window, $)
 import 'jquery-confirm/css/jquery-confirm.css'
@@ -108,12 +109,32 @@ export function fixLinkClick() {
   }
   document.addEventListener('click', e=> {
     let el = e.target as HTMLAnchorElement
-    if (el.tagName === 'A' && el.href.startsWith('http')) {
+    if (el.tagName === 'A') {
       openLink(el.href)
     }
   })
   window.open = (url: string, ...args: any[]) => {
     openLink(url)
     return window
+  }
+}
+
+
+/** error:
+ We don't execute document.execCommand() this time, because it is called recursively.
+(anonymous) @ main.js:32449
+(anonymous) @ main.js:842
+(anonymous) @ host.js:27
+see: https://github.com/nwjs/nw.js/issues/3403 */
+export function fixCut() {
+  let _exec = document.execCommand.bind(document)
+  document.execCommand = (cmd, ...args) => {
+    if (cmd === 'delete') {
+      setTimeout(() => {
+        return _exec(cmd, ...args)
+      })
+    } else {
+      return _exec(cmd, ...args)
+    }
   }
 }

@@ -1,5 +1,8 @@
+import './preload'
+
 import {
   fileToBase64,
+  fixCut,
   fixDarkTheme,
   fixLinkClick,
   fixPanelHover,
@@ -141,4 +144,6 @@ window.addEventListener('message', (e) => {
 })
 
 fixLinkClick()
+fixCut()
+
 vscode.postMessage({ command: 'ready' })
