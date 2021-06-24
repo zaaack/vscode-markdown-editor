@@ -6,6 +6,10 @@ function debug(...args: any[]) {
   console.log(...args)
 }
 
+function showError(msg: string) {
+  vscode.window.showErrorMessage(`[markdown-editor] ${msg}`)
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -61,7 +65,7 @@ class EditorPanel {
       return
     }
     if (!vscode.window.activeTextEditor && !uri) {
-      vscode.window.showErrorMessage(`Did not open markdown file!`)
+      showError(`Did not open markdown file!`)
       return
     }
     let doc: undefined | vscode.TextDocument
@@ -73,7 +77,7 @@ class EditorPanel {
       doc = vscode.window.activeTextEditor?.document
       // from command mode
       if (doc && doc.languageId !== 'markdown') {
-        vscode.window.showErrorMessage(
+        showError(
           `Current file language is not markdown, got ${doc.languageId}`
         )
         return
@@ -81,7 +85,7 @@ class EditorPanel {
     }
 
     if (!doc) {
-      vscode.window.showErrorMessage(`Cannot find markdown file!`)
+      showError(`Cannot find markdown file!`)
       return
     }
 
@@ -148,12 +152,6 @@ class EditorPanel {
       }, 300)
     }, this._disposables)
     // Handle messages from the webview
-    const imageSaveFolder = (
-      this._config.get<string>('imageSaveFolder') || 'assets'
-    ).replace(
-      '${projectRoot}',
-      vscode.workspace.getWorkspaceFolder(this._uri)?.uri.fsPath || ''
-    )
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
         debug('msg from webview review', message, this._panel.active)
@@ -171,7 +169,7 @@ class EditorPanel {
           } else if (this._uri) {
             await vscode.workspace.fs.writeFile(this._uri, message.content)
           } else {
-            vscode.window.showErrorMessage(`Cannot find original file to save!`)
+            showError(`Cannot find original file to save!`)
           }
         }
         switch (message.command) {
@@ -179,7 +177,9 @@ class EditorPanel {
             this._update({
               type: 'init',
               options: {
-                useVscodeThemeColor: this._config.get<boolean>('useVscodeThemeColor'),
+                useVscodeThemeColor: this._config.get<boolean>(
+                  'useVscodeThemeColor'
+                ),
                 ...this._context.globalState.get(KeyVditorOptions),
               },
               theme:
@@ -196,7 +196,7 @@ class EditorPanel {
             vscode.window.showInformationMessage(message.content)
             break
           case 'error':
-            vscode.window.showErrorMessage(message.content)
+            showError(message.content)
             break
           case 'edit': {
             // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
@@ -217,10 +217,25 @@ class EditorPanel {
             break
           }
           case 'upload': {
+            const imageSaveFolder = (
+              this._config.get<string>('imageSaveFolder') || 'assets'
+            )
+              .replace(
+                '${projectRoot}',
+                vscode.workspace.getWorkspaceFolder(this._uri)?.uri.fsPath || ''
+              )
+              .replace('${file}', this._fsPath)
+              .replace('${dir}', NodePath.dirname(this._fsPath))
             const assetsFolder = NodePath.resolve(
               NodePath.dirname(this._fsPath),
               imageSaveFolder
             )
+            try {
+              await vscode.workspace.fs.createDirectory(vscode.Uri.file(assetsFolder))
+            } catch (error) {
+              console.error(error)
+              showError(`Invalid image folder: ${assetsFolder}`)
+            }
             await Promise.all(
               message.files.map(async (f: any) => {
                 const content = Buffer.from(f.base64, 'base64')
@@ -234,7 +249,7 @@ class EditorPanel {
               NodePath.relative(
                 NodePath.dirname(this._fsPath),
                 NodePath.join(assetsFolder, f.name)
-              )
+              ).replace(/\\/g, '/')
             )
             this._panel.webview.postMessage({
               command: 'uploaded',
@@ -247,7 +262,7 @@ class EditorPanel {
             if (!/^http/.test(url)) {
               url = NodePath.resolve(this._fsPath, '..', url)
             }
-            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url));
+            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url))
             break
           }
         }
