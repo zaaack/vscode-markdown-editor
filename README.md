@@ -9,12 +9,12 @@
 ## Features
 
 * What You See Is What You Get (WYSIWYG)
-* Auto sync changes between vsc editor and webview
+* Auto sync changes between the VSCode editor and webview
 * Copy markdown/html
-* Upload/paste/drag-drop images will auto save to `assets` folder
+* Uploaded/pasted/drag-dropped images will be auto-saved to the `assets` folder
 * Multi-theme support
 * Shortcut keys
-* Instant Rendering mode(**Recommand!**) & Wysiwyg mode & split screen mode
+* Multiple editting modes: instant Rendering mode (**Recommand!**) / WYSIWYG mode / split screen mode
 * Markdown extensions
 * Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
 * For more usage please see [vditor](https://github.com/Vanessa219/vditor)
@@ -23,7 +23,7 @@
 
 [https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
 
-## Support syntax
+## Supported syntax
 
 [demo article](https://ld246.com/guide/markdown)
 
