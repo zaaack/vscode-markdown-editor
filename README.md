@@ -14,7 +14,7 @@
 * Uploaded/pasted/drag-dropped images will be auto-saved to the `assets` folder
 * Multi-theme support
 * Shortcut keys
-* Multiple editting modes: instant Rendering mode (**Recommand!**) / WYSIWYG mode / split screen mode
+* Multiple editting modes: instant Rendering mode (**Recommended!**) / WYSIWYG mode / split screen mode
 * Markdown extensions
 * Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
 * For more usage please see [vditor](https://github.com/Vanessa219/vditor)
@@ -29,26 +29,14 @@
 
 ## Usage
 
-### 1. Command mode in markdown file
+This plugin auto-associates itself with markdown (.md, .markdown) file format. If you have the plugin installed, and open a markdown file - it will automatically use this plugin to edit it.
 
-* open a markdown file
-* type `cmd-shift-p` to enter command mode
-* type `markdown-editor: Open with markdown editor`
+If you prefer to switch between the VSCode default editor and this plugin, you can do so by:
 
-### 2. Key bindings
+1. Use `Ctrl+shift+p` (or `Cmd+shift+p` on mac) to bring up the command pallete
+2. Search and activate `View: Reopen Editor with...`
 
-* open a markdown file
-* type `ctrl+shift+alt+m` for win or `cmd+shift+alt+m` for mac
-
-### 3. Explorer Context menu
-
-* right click on markdown file
-* then click `Open with markdown editor`
-
-### 4. Editor title context menu
-
-* right click on a opened markdown file's tab title
-* then click `Open with markdown editor`
+VSCode will provide a menu with all available editors for current file format, including Text which is the default editor.
 
 ## Acknowledgement
 
@@ -59,6 +47,12 @@
 
 * [X] Using [Custom Text Editor](https://code.visualstudio.com/api/extension-guides/custom-editors#custom-text-editor) ([demo](https://github.com/gera2ld/markmap-vscode))
 
+## Caveats
+
+This editor uses a custom webview based editor instead of VSCode's default monaco editor.
+
+So any plugins and customizations that target VSCode's editor (eg. Vim keybindings, LSP autocompletion support etc.) will not be available in markdown editor.
+
 ## License
 
 MIT
@@ -67,3 +61,6 @@ MIT
 
 If you like this extension make sure to star the repo. I am always looking for new ideas and feedback.
 In addition, it is possible to [donate via paypal](https://www.paypal.me/zaaack).
+
+
+[Test](./Test.md)
