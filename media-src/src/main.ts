@@ -72,7 +72,7 @@ function initVditor(msg) {
       url: '/fuzzy', // 没有 url 参数粘贴图片无法上传 see: https://github.com/Vanessa219/vditor/blob/d7628a0a7cfe5d28b055469bf06fb0ba5cfaa1b2/src/ts/util/fixBrowserBehavior.ts#L1409
       async handler(files) {
         // console.log('files', files)
-        let fileInfos = await Promise.all(
+        const fileInfos = await Promise.all(
           files.map(async (f) => {
             const d = new Date()
             return {

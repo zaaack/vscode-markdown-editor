@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as NodePath from 'path'
+import MarkdownEditorProvider from './MarkdownEditorProvider'
 const KeyVditorOptions = 'vditor.options'
 
 function debug(...args: any[]) {
@@ -12,25 +13,15 @@ function showError(msg: string) {
 
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      'markdown-editor.openEditor',
-      (uri?: vscode.Uri, ...args) => {
-        debug('command', uri, args)
-        EditorPanel.createOrShow(context, uri)
-      }
-    )
+    MarkdownEditorProvider.register(context)
   )
-
   context.globalState.setKeysForSync([KeyVditorOptions])
 }
 
-function getWebviewOptions(
-  extensionUri: vscode.Uri
-): vscode.WebviewOptions & vscode.WebviewPanelOptions {
+function getWebviewOptions(): vscode.WebviewOptions & vscode.WebviewPanelOptions {
   return {
     // Enable javascript in the webview
     enableScripts: true,
-
     retainContextWhenHidden: true,
   }
 }
@@ -38,71 +29,24 @@ function getWebviewOptions(
 /**
  * Manages cat coding webview panels
  */
-class EditorPanel {
-  /**
-   * Track the currently panel. Only allow a single panel to exist at a time.
-   */
-  public static currentPanel: EditorPanel | undefined
+export class EditorPanel {
 
   public static readonly viewType = 'markdown-editor'
 
   private _disposables: vscode.Disposable[] = []
 
-  public static async createOrShow(
+  public static async resolve(
     context: vscode.ExtensionContext,
-    uri?: vscode.Uri
+    doc: vscode.TextDocument, 
+    panel: vscode.WebviewPanel, 
   ) {
-    const { extensionUri } = context
-    const column = vscode.window.activeTextEditor
-      ? vscode.window.activeTextEditor.viewColumn
-      : undefined
-    if (EditorPanel.currentPanel && uri !== EditorPanel.currentPanel?._uri) {
-      EditorPanel.currentPanel.dispose()
-    }
-    // If we already have a panel, show it.
-    if (EditorPanel.currentPanel) {
-      EditorPanel.currentPanel._panel.reveal(column)
-      return
-    }
-    if (!vscode.window.activeTextEditor && !uri) {
-      showError(`Did not open markdown file!`)
-      return
-    }
-    let doc: undefined | vscode.TextDocument
-    // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
-    if (uri) {
-      // 从右键打开文件，先打开文档然后开启自动同步，不然没法保存文件和同步到已经打开的document
-      doc = await vscode.workspace.openTextDocument(uri)
-    } else {
-      doc = vscode.window.activeTextEditor?.document
-      // from command mode
-      if (doc && doc.languageId !== 'markdown') {
-        showError(
-          `Current file language is not markdown, got ${doc.languageId}`
-        )
-        return
-      }
-    }
-
-    if (!doc) {
-      showError(`Cannot find markdown file!`)
-      return
-    }
-
-    // Otherwise, create a new panel.
-    const panel = vscode.window.createWebviewPanel(
-      EditorPanel.viewType,
-      'markdown-editor',
-      column || vscode.ViewColumn.One,
-      getWebviewOptions(extensionUri)
-    )
-
-    EditorPanel.currentPanel = new EditorPanel(
+    panel.webview.options = getWebviewOptions()
+    new EditorPanel(
       context,
       panel,
-      extensionUri,
+      context.extensionUri,
       doc,
-      uri
+      doc.uri
     )
   }
 
@@ -273,11 +217,6 @@ class EditorPanel {
   }
 
   public dispose() {
-    EditorPanel.currentPanel = undefined
-
-    // Clean up our resources
-    this._panel.dispose()
-
     while (this._disposables.length) {
       const x = this._disposables.pop()
       if (x) {
@@ -288,11 +227,12 @@ class EditorPanel {
 
   private _init() {
     const webview = this._panel.webview
-
     this._panel.webview.html = this._getHtmlForWebview(webview)
     this._panel.title = NodePath.basename(this._fsPath)
   }
+
   private _isEdit = false
+
   private _updateEditTitle() {
     const isEdit = this._document.isDirty
     if (isEdit !== this._isEdit) {

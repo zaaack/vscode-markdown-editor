@@ -22,9 +22,7 @@
     "markdown-editor"
   ],
   "activationEvents": [
-    "onCommand:markdown-editor.openEditor",
-    "onWebviewPanel:markdown-editor",
-    "onLanguage:markdown"
+    "onCustomEditor:markdown-editor"
   ],
   "repository": {
     "type": "git",
@@ -36,29 +34,6 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "markdown-editor.openEditor",
-        "title": "Open with markdown editor",
-        "category": "markdown-editor"
-      }
-    ],
-    "menus": {
-      "explorer/context": [
-        {
-          "when": "resourceLangId == markdown",
-          "command": "markdown-editor.openEditor",
-          "group": "navigation"
-        }
-      ],
-      "editor/title/context": [
-        {
-          "when": "resourceLangId == markdown",
-          "command": "markdown-editor.openEditor",
-          "group": "1_open"
-        }
-      ]
-    },
     "configuration": {
       "title": "markdown-editor",
       "properties": {
@@ -74,14 +49,16 @@
         }
       }
     },
-    "keybindings": [
-      {
-        "key": "ctrl+shift+alt+m",
-        "command": "markdown-editor.openEditor",
-        "mac": "cmd+shift+alt+m",
-        "when": "editorTextFocus && editorLangId == markdown"
-      }
-    ]
+    "customEditors": [{
+      "viewType": "markdown-editor",
+      "displayName": "Markdown WYSIWYG Editor",
+      "selector": [{
+        "filenamePattern": "*.md"
+      }, {
+        "filenamePattern": "*.markdown"
+      }],
+      "priority": "default"
+    }]
   },
   "scripts": {
     "vscode:prepublish": "yarn foy build",
@@ -92,7 +69,6 @@
     "pub": "npm version patch; git push origin master --tags",
     "test": "echo 0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^12.12.0",
     "@types/vscode": "^1.47.0",
@@ -101,6 +77,7 @@
     "eslint": "^7.21.0",
     "foy": "^0.2.5",
     "ts-node": "^9.1.1",
-    "typescript": "^4.2.2"
+    "typescript": "^4.2.2",
+    "vsce": "^2.9.2"
   }
 }
