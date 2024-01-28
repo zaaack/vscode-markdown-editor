@@ -348,6 +348,7 @@ class EditorPanel {
 				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
 
 				<title>markdown editor</title>
+        <style>` +  this._config.get<string>('customCss') + `</style>
 			</head>
 			<body>
 				<div id="app"></div>
