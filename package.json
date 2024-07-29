@@ -71,6 +71,10 @@
           "type": "boolean",
           "default": true,
           "description": "Use vscode theme's background color as the markdown editor's background color."
+        },
+        "markdown-editor.customCss": {
+          "type": "string",
+          "default": ""
         }
       }
     },
@@ -92,7 +96,6 @@
     "pub": "npm version patch; git push origin master --tags",
     "test": "echo 0"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/node": "^12.12.0",
     "@types/vscode": "^1.47.0",
