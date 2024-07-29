@@ -89,7 +89,6 @@
   },
   "scripts": {
     "vscode:prepublish": "yarn foy build",
-    "preversion": "yarn foy build",
     "watch": "yarn foy watch",
     "start": "yarn foy watch",
     "pub": "yarn foy build && npm version patch && git push origin master --tags",
