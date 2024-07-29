@@ -13,4 +13,6 @@ task('build', async (ctx) => {
     ctx.exec('tsc -p ./'),
     ctx.cd('./media-src').exec('yarn build'),
   ])
+  await ctx.exec('git add -A')
+  await ctx.exec('git commit -m "build"')
 })
