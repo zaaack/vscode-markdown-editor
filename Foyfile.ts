@@ -14,9 +14,4 @@ task('build', async (ctx) => {
     ctx.cd('./media-src').exec('yarn build'),
   ])
   await ctx.exec('git add -A')
-  try {
-    await ctx.exec('git commit -m "build"')
-  } catch (e) {
-    console.log(e)
-  }
 })

@@ -91,7 +91,7 @@
     "vscode:prepublish": "yarn foy build",
     "watch": "yarn foy watch",
     "start": "yarn foy watch",
-    "pub": "yarn foy build && npm version patch && git push origin master --tags",
+    "pub": "yarn foy build && npm version patch && git push origin master --tags && vsce package && vsce publish",
     "test": "echo 0"
   },
   "devDependencies": {
