@@ -31,5 +31,5 @@ jobs:
         uses: HaaLeo/publish-vscode-extension@v0
         id: publishToOpenVSX
         with:
-          pat: 1312321321231 #${{ secrets.OPEN_VSX_TOKEN }}
+          pat: ${{ secrets.OPEN_VSX_TOKEN }}
       
