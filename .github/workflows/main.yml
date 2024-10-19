@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 14
       - name: Install
-        run: yarn; cd ./media-src; yarn #; cd ..;yarn global add vsce; vsce package
+        run: yarn; cd ./media-src; yarn; cd ..;yarn global add vsce; vsce package
       - name: Test
         run: npm test
       - name: Publish to Open VSX Registry
