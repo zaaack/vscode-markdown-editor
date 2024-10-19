@@ -18,6 +18,7 @@ jobs:
       - name: Publish to Open VSX Registry
         uses: HaaLeo/publish-vscode-extension@v0
         id: publishToOpenVSX
+        continue-on-error: true
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
       - name: Upload VSIX as an artifact
