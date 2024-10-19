@@ -3,11 +3,11 @@
   "displayName": "Markdown Editor",
   "icon": "media/logo.png",
   "description": "A full-featured WYSIWYG editor for markdown.",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "publisher": "zaaack",
   "private": true,
   "engines": {
-    "vscode": "^1.47.0"
+    "vscode": "^1.94.0"
   },
   "categories": [
     "Programming Languages",
