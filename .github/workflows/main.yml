@@ -12,7 +12,7 @@ jobs:
         with:
           node-version: 14
       - name: Install
-        run: yarn; cd ./media-src; yarn
+        run: yarn; cd ./media-src; yarn; yarn global add vsce; vsce package
       - name: Test
         run: npm test
       - name: Publish to Visual Studio Marketplace
