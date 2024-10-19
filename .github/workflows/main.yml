@@ -15,6 +15,11 @@ jobs:
         run: yarn; cd ./media-src; yarn #; cd ..;yarn global add vsce; vsce package
       - name: Test
         run: npm test
+      - name: Publish to Open VSX Registry
+        uses: HaaLeo/publish-vscode-extension@v0
+        id: publishToOpenVSX
+        with:
+          pat: ${{ secrets.OPEN_VSX_TOKEN }}
       - name: Upload VSIX as an artifact
         uses: actions/upload-artifact@v3
         with:
@@ -27,9 +32,5 @@ jobs:
           registryUrl: https://marketplace.visualstudio.com
           extensionFile: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
           packagePath: ''
-      - name: Publish to Open VSX Registry
-        uses: HaaLeo/publish-vscode-extension@v0
-        id: publishToOpenVSX
-        with:
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
+      
       
