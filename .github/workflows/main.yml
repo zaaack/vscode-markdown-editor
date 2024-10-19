@@ -15,6 +15,11 @@ jobs:
         run: yarn; cd ./media-src; yarn; cd ..;yarn global add vsce; vsce package
       - name: Test
         run: npm test
+      - name: Upload VSIX as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: vsix-package
+          path: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v0
         with:
@@ -26,4 +31,5 @@ jobs:
         uses: HaaLeo/publish-vscode-extension@v0
         id: publishToOpenVSX
         with:
-          pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          pat: 1312321321231 #${{ secrets.OPEN_VSX_TOKEN }}
+      
