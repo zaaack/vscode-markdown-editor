@@ -30,11 +30,7 @@
     "type": "git",
     "url": "https://github.com/zaaack/vscode-markdown-editor.git"
   },
-  "files": [
-    "./media",
-    "./out"
-  ],
-  "main": "./out/extension.js",
+  "main": "out/extension.js",
   "contributes": {
     "commands": [
       {
@@ -88,17 +84,19 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "yarn foy build",
-    "watch": "yarn foy watch",
-    "start": "yarn foy watch",
-    "pub": "yarn foy build && npm version patch && git push origin master --tags && vsce package && vsce publish",
-    "test": "echo 0"
+    "watch": "foy watch",
+    "start": "foy watch",
+    "pub": "foy build && npm version patch && git push origin master --tags && vsce package && vsce publish"
   },
   "devDependencies": {
     "@types/node": "^12.12.0",
     "@types/vscode": "^1.47.0",
     "foy": "^0.2.5",
-    "ts-node": "^9.1.1",
-    "typescript": "^4.2.2"
+    "ts-node": "9.1.1",
+    "typescript": "4.2.2"
+  },
+  "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b",
+  "dependencies": {
+    "@vscode/vsce": "^3.2.1"
   }
 }

@@ -24,17 +24,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.globalState.setKeysForSync([KeyVditorOptions])
 }
 
-function getWebviewOptions(
-  extensionUri: vscode.Uri
-): vscode.WebviewOptions & vscode.WebviewPanelOptions {
-  return {
-    // Enable javascript in the webview
-    enableScripts: true,
-
-    retainContextWhenHidden: true,
-  }
-}
-
 /**
  * Manages cat coding webview panels
  */
@@ -94,7 +83,7 @@ class EditorPanel {
       EditorPanel.viewType,
       'markdown-editor',
       column || vscode.ViewColumn.One,
-      getWebviewOptions(extensionUri)
+      EditorPanel.getWebviewOptions(uri)
     )
 
     EditorPanel.currentPanel = new EditorPanel(
@@ -106,11 +95,31 @@ class EditorPanel {
     )
   }
 
+  private static getFolders(): vscode.Uri[] {
+    const data = []
+    for (let i = 65; i <= 90; i++) {
+      data.push(vscode.Uri.file(`${String.fromCharCode(i)}:/`))
+    }
+    return data
+  }
+
+  static getWebviewOptions(
+    uri?: vscode.Uri
+  ): vscode.WebviewOptions & vscode.WebviewPanelOptions {
+    return {
+      // Enable javascript in the webview
+      enableScripts: true,
+
+            localResourceRoots: [vscode.Uri.file("/"), ...this.getFolders()],
+      retainContextWhenHidden: true,
+      enableCommandUris: true,
+    }
+  }
   private get _fsPath() {
     return this._uri.fsPath
   }
 
-  private get _config() {
+  static get config() {
     return vscode.workspace.getConfiguration('markdown-editor')
   }
 
@@ -177,7 +186,7 @@ class EditorPanel {
             this._update({
               type: 'init',
               options: {
-                useVscodeThemeColor: this._config.get<boolean>(
+                useVscodeThemeColor: EditorPanel.config.get<boolean>(
                   'useVscodeThemeColor'
                 ),
                 ...this._context.globalState.get(KeyVditorOptions),
@@ -217,22 +226,11 @@ class EditorPanel {
             break
           }
           case 'upload': {
-            const imageSaveFolder = (
-              this._config.get<string>('imageSaveFolder') || 'assets'
-            )
-              .replace(
-                '${projectRoot}',
-                vscode.workspace.getWorkspaceFolder(this._uri)?.uri.fsPath || ''
-              )
-              .replace('${file}', this._fsPath)
-	      .replace('${fileBasenameNoExtension}',NodePath.basename(this._fsPath,NodePath.extname(this._fsPath) ))
-              .replace('${dir}', NodePath.dirname(this._fsPath))
-            const assetsFolder = NodePath.resolve(
-              NodePath.dirname(this._fsPath),
-              imageSaveFolder
-            )
+            const assetsFolder = EditorPanel.getAssetsFolder(this._uri)
             try {
-              await vscode.workspace.fs.createDirectory(vscode.Uri.file(assetsFolder))
+              await vscode.workspace.fs.createDirectory(
+                vscode.Uri.file(assetsFolder)
+              )
             } catch (error) {
               console.error(error)
               showError(`Invalid image folder: ${assetsFolder}`)
@@ -271,6 +269,27 @@ class EditorPanel {
       null,
       this._disposables
     )
+  }
+
+  static getAssetsFolder(uri: vscode.Uri) {
+    const imageSaveFolder = (
+      EditorPanel.config.get<string>('imageSaveFolder') || 'assets'
+    )
+      .replace(
+        '${projectRoot}',
+        vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath || ''
+      )
+      .replace('${file}', uri.fsPath)
+      .replace(
+        '${fileBasenameNoExtension}',
+        NodePath.basename(uri.fsPath, NodePath.extname(uri.fsPath))
+      )
+      .replace('${dir}', NodePath.dirname(uri.fsPath))
+    const assetsFolder = NodePath.resolve(
+      NodePath.dirname(uri.fsPath),
+      imageSaveFolder
+    )
+    return assetsFolder
   }
 
   public dispose() {
@@ -337,7 +356,8 @@ class EditorPanel {
     const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
     const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
 
-    return `<!DOCTYPE html>
+    return (
+      `<!DOCTYPE html>
 			<html lang="en">
 			<head>
 				<meta charset="UTF-8">
@@ -349,7 +369,9 @@ class EditorPanel {
 				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
 
 				<title>markdown editor</title>
-        <style>` +  this._config.get<string>('customCss') + `</style>
+        <style>` +
+      EditorPanel.config.get<string>('customCss') +
+      `</style>
 			</head>
 			<body>
 				<div id="app"></div>
@@ -358,5 +380,6 @@ class EditorPanel {
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
 			</body>
 			</html>`
+    )
   }
 }

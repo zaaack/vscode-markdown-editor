@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": "true",
   "scripts": {
-    "start": "yarn esbuild ./src/main.ts --bundle --watch --sourcemap --outfile=../media/dist/main.js",
-    "build": "rm -rf ../media/dist; yarn esbuild ./src/main.ts --bundle --minify --sourcemap --outfile=../media/dist/main.js"
+    "start": "pnpm esbuild ./src/main.ts --bundle --watch --sourcemap --outfile=../media/dist/main.js",
+    "build": "rm -rf ../media/dist; pnpm esbuild ./src/main.ts --bundle --minify --sourcemap --outfile=../media/dist/main.js"
   },
   "browserslist": "> 0%",
   "devDependencies": {

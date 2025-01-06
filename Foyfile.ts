@@ -4,14 +4,14 @@ task('watch', async (ctx) => {
   // Your build tasks
   await Promise.all([
     ctx.exec('tsc -w -p ./'),
-    ctx.cd('./media-src').exec('yarn start'),
+    ctx.cd('./media-src').exec('pnpm start'),
   ])
 })
 
 task('build', async (ctx) => {
   await Promise.all([
     ctx.exec('tsc -p ./'),
-    ctx.cd('./media-src').exec('yarn build'),
+    ctx.cd('./media-src').exec('pnpm build'),
   ])
   await ctx.exec('git add -A')
 })
