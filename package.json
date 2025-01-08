@@ -7,7 +7,7 @@
   "publisher": "zaaack",
   "private": true,
   "engines": {
-    "vscode": "^1.47.0"
+    "vscode": "^1.94.0"
   },
   "categories": [
     "Programming Languages",
