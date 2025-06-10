@@ -21,6 +21,16 @@ export function activate(context: vscode.ExtensionContext) {
     )
   )
 
+  // Listen for markdown file open events
+  vscode.workspace.onDidOpenTextDocument((doc) => {
+    if (doc.languageId === 'markdown' && doc.uri.scheme === 'file') {
+      const config = vscode.workspace.getConfiguration('markdown-editor')
+      if (config.get<boolean>('autoEnterPluginViewOnMarkdownOpen')) {
+        EditorPanel.createOrShow(context, doc.uri)
+      }
+    }
+  })
+
   context.globalState.setKeysForSync([KeyVditorOptions])
 }
 
