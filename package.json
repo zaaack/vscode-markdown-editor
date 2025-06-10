@@ -71,6 +71,11 @@
         "markdown-editor.customCss": {
           "type": "string",
           "default": ""
+        },
+        "markdown-editor.autoEnterPluginViewOnMarkdownOpen": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically enter the plugin view when opening a markdown file."
         }
       }
     },
