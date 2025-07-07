@@ -70,7 +70,22 @@
         },
         "markdown-editor.customCss": {
           "type": "string",
-          "default": ""
+          "default": "",
+          "description": "Inline CSS styles to apply to the markdown editor."
+        },
+        "markdown-editor.externalCssFiles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Array of external CSS file paths or URLs to load into the markdown editor. Supports local file paths, workspace relative paths, and HTTP/HTTPS URLs."
+        },
+        "markdown-editor.cssLoadOrder": {
+          "type": "string",
+          "enum": ["external-first", "custom-first"],
+          "default": "external-first",
+          "description": "Order to load CSS: 'external-first' loads external CSS files before custom CSS, 'custom-first' loads custom CSS before external files."
         }
       }
     },

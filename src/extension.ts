@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as NodePath from 'path'
+import * as fs from 'fs'
 const KeyVditorOptions = 'vditor.options'
 
 function debug(...args: any[]) {
@@ -159,6 +160,16 @@ class EditorPanel {
         this._update()
         this._updateEditTitle()
       }, 300)
+    }, this._disposables)
+    
+    // 监听配置变化，当CSS相关配置改变时重新加载webview
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('markdown-editor.externalCssFiles') ||
+          e.affectsConfiguration('markdown-editor.customCss') ||
+          e.affectsConfiguration('markdown-editor.cssLoadOrder')) {
+        // 重新生成HTML以应用新的CSS配置
+        this._panel.webview.html = this._getHtmlForWebview(this._panel.webview)
+      }
     }, this._disposables)
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
@@ -356,6 +367,19 @@ class EditorPanel {
     const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
     const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
 
+    // 生成外部CSS链接
+    const externalCssLinks = this._generateExternalCssLinks(webview)
+    const customCss = EditorPanel.config.get<string>('customCss') || ''
+    const cssLoadOrder = EditorPanel.config.get<string>('cssLoadOrder') || 'external-first'
+
+    // 根据配置决定CSS加载顺序
+    let cssContent = ''
+    if (cssLoadOrder === 'external-first') {
+      cssContent = externalCssLinks + (customCss ? `\n<style>${customCss}</style>` : '')
+    } else {
+      cssContent = (customCss ? `<style>${customCss}</style>\n` : '') + externalCssLinks
+    }
+
     return (
       `<!DOCTYPE html>
 			<html lang="en">
@@ -365,21 +389,76 @@ class EditorPanel {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<base href="${baseHref}" />
 
-
 				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
+				${cssContent}
 
 				<title>markdown editor</title>
-        <style>` +
-      EditorPanel.config.get<string>('customCss') +
-      `</style>
 			</head>
 			<body>
 				<div id="app"></div>
-
 
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
 			</body>
 			</html>`
     )
+  }
+
+  /**
+   * 生成外部CSS链接
+   */
+  private _generateExternalCssLinks(webview: vscode.Webview): string {
+    const externalCssFiles = EditorPanel.config.get<string[]>('externalCssFiles') || []
+    
+    return externalCssFiles.map(cssFile => {
+      // 处理不同类型的CSS路径
+      if (this._isHttpUrl(cssFile)) {
+        // HTTP/HTTPS URL
+        return `<link href="${cssFile}" rel="stylesheet" crossorigin="anonymous">`
+      } else if (NodePath.isAbsolute(cssFile)) {
+        // 绝对路径
+        try {
+          const cssUri = webview.asWebviewUri(vscode.Uri.file(cssFile))
+          return `<link href="${cssUri}" rel="stylesheet">`
+        } catch (error) {
+          console.warn(`Failed to load CSS file: ${cssFile}`, error)
+          return `<!-- Failed to load CSS: ${cssFile} -->`
+        }
+      } else {
+        // 相对路径（相对于工作区或markdown文件）
+        try {
+          let resolvedPath: string
+          
+          // 尝试相对于当前markdown文件解析
+          const markdownDir = NodePath.dirname(this._fsPath)
+          const relativeToMarkdown = NodePath.resolve(markdownDir, cssFile)
+          
+          // 检查文件是否存在
+          if (fs.existsSync(relativeToMarkdown)) {
+            resolvedPath = relativeToMarkdown
+          } else {
+            // 尝试相对于工作区根目录解析
+            const workspaceFolder = vscode.workspace.getWorkspaceFolder(this._uri)
+            if (workspaceFolder) {
+              resolvedPath = NodePath.resolve(workspaceFolder.uri.fsPath, cssFile)
+            } else {
+              resolvedPath = relativeToMarkdown // 降级到相对于markdown文件
+            }
+          }
+          
+          const cssUri = webview.asWebviewUri(vscode.Uri.file(resolvedPath))
+          return `<link href="${cssUri}" rel="stylesheet">`
+        } catch (error) {
+          console.warn(`Failed to resolve CSS file: ${cssFile}`, error)
+          return `<!-- Failed to resolve CSS: ${cssFile} -->`
+        }
+      }
+    }).join('\n')
+  }
+
+  /**
+   * 检查是否为HTTP/HTTPS URL
+   */
+  private _isHttpUrl(url: string): boolean {
+    return /^https?:\/\//i.test(url)
   }
 }

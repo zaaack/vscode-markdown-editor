@@ -1,0 +1,74 @@
+/* 示例外部CSS文件 - 自定义markdown编辑器样式 */
+
+/* 设置编辑器背景色 */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+}
+
+/* 自定义标题样式 */
+h1, h2, h3, h4, h5, h6 {
+    color: #1fd700 !important;
+    border-bottom: 2px solid #ffd700 !important;
+    padding-bottom: 5px !important;
+}
+
+/* 自定义代码块样式 */
+pre {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #ffd700 !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+}
+
+code {
+    background: rgba(255, 215, 0, 0.2) !important;
+    color: #ffd700 !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+}
+
+/* 自定义链接样式 */
+a {
+    color: #00ff7f !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: #32cd32 !important;
+    text-decoration: underline !important;
+}
+
+/* 自定义表格样式 */
+table {
+    border-collapse: collapse !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+th, td {
+    border: 1px solid #ffd700 !important;
+    padding: 8px 12px !important;
+}
+
+th {
+    background: rgba(255, 215, 0, 0.3) !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* 自定义引用块样式 */
+blockquote {
+    border-left: 4px solid #ffd700 !important;
+    background: rgba(255, 215, 0, 0.1) !important;
+    padding: 10px 15px !important;
+    margin: 10px 0 !important;
+}
+
+/* 自定义列表样式 */
+ul li::marker {
+    color: #ffd700 !important;
+}
+
+ol li::marker {
+    color: #ffd700 !important;
+}
