@@ -10,6 +10,25 @@ function showError(msg: string) {
   vscode.window.showErrorMessage(`[markdown-editor] ${msg}`)
 }
 
+/**
+ * 自定义编辑器提供者
+ */
+class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
+  constructor(private readonly context: vscode.ExtensionContext) {}
+
+  public async resolveCustomTextEditor(
+    document: vscode.TextDocument,
+    webviewPanel: vscode.WebviewPanel,
+    _token: vscode.CancellationToken
+  ): Promise<void> {
+    // 设置webview选项
+    webviewPanel.webview.options = EditorPanel.getWebviewOptions(document.uri)
+    
+    // 创建EditorPanel实例来处理编辑器逻辑
+    new EditorPanel(this.context, webviewPanel, this.context.extensionUri, document, document.uri)
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -17,6 +36,20 @@ export function activate(context: vscode.ExtensionContext) {
       (uri?: vscode.Uri, ...args) => {
         debug('command', uri, args)
         EditorPanel.createOrShow(context, uri)
+      }
+    )
+  )
+
+  // 注册自定义编辑器提供者
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(
+      'markdown-editor.editor',
+      new MarkdownEditorProvider(context),
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+        supportsMultipleEditorsPerDocument: false,
       }
     )
   )
@@ -123,7 +156,7 @@ class EditorPanel {
     return vscode.workspace.getConfiguration('markdown-editor')
   }
 
-  private constructor(
+  public constructor(
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
     private readonly _extensionUri: vscode.Uri,
