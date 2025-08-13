@@ -1,19 +1,19 @@
-/* 示例外部CSS文件 - 自定义markdown编辑器样式 */
+/* Example external CSS file - Custom markdown editor styles */
 
-/* 设置编辑器背景色 */
+/* Set editor background color */
 body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     color: #ffffff !important;
 }
 
-/* 自定义标题样式 */
+/* Title Style */
 h1, h2, h3, h4, h5, h6 {
     color: #1fd700 !important;
     border-bottom: 2px solid #ffd700 !important;
     padding-bottom: 5px !important;
 }
 
-/* 自定义代码块样式 */
+/* Code block styles */
 pre {
     background: rgba(0, 0, 0, 0.3) !important;
     border: 1px solid #ffd700 !important;
@@ -28,7 +28,7 @@ code {
     border-radius: 3px !important;
 }
 
-/* 自定义链接样式 */
+/* Link styles */
 a {
     color: #00ff7f !important;
     text-decoration: none !important;
@@ -39,7 +39,7 @@ a:hover {
     text-decoration: underline !important;
 }
 
-/* 自定义表格样式 */
+/* Table styles */
 table {
     border-collapse: collapse !important;
     background: rgba(255, 255, 255, 0.1) !important;
@@ -56,7 +56,7 @@ th {
     font-weight: bold !important;
 }
 
-/* 自定义引用块样式 */
+/* Quote block style */
 blockquote {
     border-left: 4px solid #ffd700 !important;
     background: rgba(255, 215, 0, 0.1) !important;
@@ -64,7 +64,7 @@ blockquote {
     margin: 10px 0 !important;
 }
 
-/* 自定义列表样式 */
+/* list styles */
 ul li::marker {
     color: #ffd700 !important;
 }
