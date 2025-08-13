@@ -1,0 +1,74 @@
+/* Example external CSS file - Custom markdown editor styles */
+
+/* Set editor background color */
+body {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+}
+
+/* Title Style */
+h1, h2, h3, h4, h5, h6 {
+    color: #1fd700 !important;
+    border-bottom: 2px solid #ffd700 !important;
+    padding-bottom: 5px !important;
+}
+
+/* Code block styles */
+pre {
+    background: rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #ffd700 !important;
+    border-radius: 8px !important;
+    padding: 15px !important;
+}
+
+code {
+    background: rgba(255, 215, 0, 0.2) !important;
+    color: #ffd700 !important;
+    padding: 2px 4px !important;
+    border-radius: 3px !important;
+}
+
+/* Link styles */
+a {
+    color: #00ff7f !important;
+    text-decoration: none !important;
+}
+
+a:hover {
+    color: #32cd32 !important;
+    text-decoration: underline !important;
+}
+
+/* Table styles */
+table {
+    border-collapse: collapse !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+th, td {
+    border: 1px solid #ffd700 !important;
+    padding: 8px 12px !important;
+}
+
+th {
+    background: rgba(255, 215, 0, 0.3) !important;
+    color: #ffffff !important;
+    font-weight: bold !important;
+}
+
+/* Quote block style */
+blockquote {
+    border-left: 4px solid #ffd700 !important;
+    background: rgba(255, 215, 0, 0.1) !important;
+    padding: 10px 15px !important;
+    margin: 10px 0 !important;
+}
+
+/* list styles */
+ul li::marker {
+    color: #ffd700 !important;
+}
+
+ol li::marker {
+    color: #ffd700 !important;
+}

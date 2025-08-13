@@ -1,5 +1,6 @@
 import * as vscode from 'vscode'
 import * as NodePath from 'path'
+import * as fs from 'fs'
 const KeyVditorOptions = 'vditor.options'
 
 function debug(...args: any[]) {
@@ -58,9 +59,9 @@ class EditorPanel {
       return
     }
     let doc: undefined | vscode.TextDocument
-    // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
+    // from context menu : Search for the current markdown editor from the currently opened textEditor, and bind the document if found.
     if (uri) {
-      // 从右键打开文件，先打开文档然后开启自动同步，不然没法保存文件和同步到已经打开的document
+      // To open a file from the right-click menu, first open the document and then enable auto-sync. Otherwise, you won't be able to save the file or sync it to the already opened document.
       doc = await vscode.workspace.openTextDocument(uri)
     } else {
       doc = vscode.window.activeTextEditor?.document
@@ -127,8 +128,8 @@ class EditorPanel {
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
     private readonly _extensionUri: vscode.Uri,
-    public _document: vscode.TextDocument, // 当前有 markdown 编辑器
-    public _uri = _document.uri // 从资源管理器打开，只有 uri 没有 _document
+    public _document: vscode.TextDocument,
+    public _uri = _document.uri
   ) {
     // Set the webview's initial html content
 
@@ -149,7 +150,6 @@ class EditorPanel {
       if (e.document.fileName !== this._document.fileName) {
         return
       }
-      // 当 webview panel 激活时不将由 webview编辑导致的 vsc 编辑器更新同步回 webview
       // don't change webview panel when webview panel is focus
       if (this._panel.active) {
         return
@@ -159,6 +159,16 @@ class EditorPanel {
         this._update()
         this._updateEditTitle()
       }, 300)
+    }, this._disposables)
+    
+    // Monitor configuration changes and reload the webview when CSS-related configurations are modified.
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (e.affectsConfiguration('markdown-editor.externalCssFiles') ||
+          e.affectsConfiguration('markdown-editor.customCss') ||
+          e.affectsConfiguration('markdown-editor.cssLoadOrder')) {
+        // Regenerate HTML to apply new CSS configuration
+        this._panel.webview.html = this._getHtmlForWebview(this._panel.webview)
+      }
     }, this._disposables)
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
@@ -208,7 +218,7 @@ class EditorPanel {
             showError(message.content)
             break
           case 'edit': {
-            // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
+            // Only synchronize to the VSC editor when the webview is in edit mode to avoid repeated refreshing.
             if (this._panel.active) {
               await syncToEditor()
               this._updateEditTitle()
@@ -356,6 +366,19 @@ class EditorPanel {
     const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
     const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
 
+    // Generate external CSS links
+    const externalCssLinks = this._generateExternalCssLinks(webview)
+    const customCss = EditorPanel.config.get<string>('customCss') || ''
+    const cssLoadOrder = EditorPanel.config.get<string>('cssLoadOrder') || 'external-first'
+
+    // Determines CSS loading order based on configuration
+    let cssContent = ''
+    if (cssLoadOrder === 'external-first') {
+      cssContent = externalCssLinks + (customCss ? `\n<style>${customCss}</style>` : '')
+    } else {
+      cssContent = (customCss ? `<style>${customCss}</style>\n` : '') + externalCssLinks
+    }
+
     return (
       `<!DOCTYPE html>
 			<html lang="en">
@@ -365,21 +388,76 @@ class EditorPanel {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<base href="${baseHref}" />
 
-
 				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
+				${cssContent}
 
 				<title>markdown editor</title>
-        <style>` +
-      EditorPanel.config.get<string>('customCss') +
-      `</style>
 			</head>
 			<body>
 				<div id="app"></div>
-
 
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
 			</body>
 			</html>`
     )
+  }
+
+  /**
+   * Generate external CSS links
+   */
+  private _generateExternalCssLinks(webview: vscode.Webview): string {
+    const externalCssFiles = EditorPanel.config.get<string[]>('externalCssFiles') || []
+    
+    return externalCssFiles.map(cssFile => {
+      // Handling different types of CSS paths
+      if (this._isHttpUrl(cssFile)) {
+        // HTTP/HTTPS URL
+        return `<link href="${cssFile}" rel="stylesheet" crossorigin="anonymous">`
+      } else if (NodePath.isAbsolute(cssFile)) {
+        // absolute path
+        try {
+          const cssUri = webview.asWebviewUri(vscode.Uri.file(cssFile))
+          return `<link href="${cssUri}" rel="stylesheet">`
+        } catch (error) {
+          console.warn(`Failed to load CSS file: ${cssFile}`, error)
+          return `<!-- Failed to load CSS: ${cssFile} -->`
+        }
+      } else {
+        // Relative path (relative to the workspace or markdown file)
+        try {
+          let resolvedPath: string
+          
+          // Try parsing relative to the current markdown file
+          const markdownDir = NodePath.dirname(this._fsPath)
+          const relativeToMarkdown = NodePath.resolve(markdownDir, cssFile)
+          
+          // Check if the file exists
+          if (fs.existsSync(relativeToMarkdown)) {
+            resolvedPath = relativeToMarkdown
+          } else {
+            // Try to resolve relative to the workspace root directory
+            const workspaceFolder = vscode.workspace.getWorkspaceFolder(this._uri)
+            if (workspaceFolder) {
+              resolvedPath = NodePath.resolve(workspaceFolder.uri.fsPath, cssFile)
+            } else {
+              resolvedPath = relativeToMarkdown // Downgrade relative to the markdown file
+            }
+          }
+          
+          const cssUri = webview.asWebviewUri(vscode.Uri.file(resolvedPath))
+          return `<link href="${cssUri}" rel="stylesheet">`
+        } catch (error) {
+          console.warn(`Failed to resolve CSS file: ${cssFile}`, error)
+          return `<!-- Failed to resolve CSS: ${cssFile} -->`
+        }
+      }
+    }).join('\n')
+  }
+
+  /**
+   * Check if it is an HTTP/HTTPS URL
+   */
+  private _isHttpUrl(url: string): boolean {
+    return /^https?:\/\//i.test(url)
   }
 }
