@@ -10,6 +10,22 @@ function showError(msg: string) {
   vscode.window.showErrorMessage(`[markdown-editor] ${msg}`)
 }
 
+
+class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
+  constructor(private readonly context: vscode.ExtensionContext) {}
+
+  public async resolveCustomTextEditor(
+    document: vscode.TextDocument,
+    webviewPanel: vscode.WebviewPanel,
+    _token: vscode.CancellationToken
+  ): Promise<void> {
+    webviewPanel.webview.options = EditorPanel.getWebviewOptions(document.uri)
+    
+    // Create an instance of EditorPanel to handle editor logic
+    new EditorPanel(this.context, webviewPanel, this.context.extensionUri, document, document.uri)
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(
     vscode.commands.registerCommand(
@@ -17,6 +33,20 @@ export function activate(context: vscode.ExtensionContext) {
       (uri?: vscode.Uri, ...args) => {
         debug('command', uri, args)
         EditorPanel.createOrShow(context, uri)
+      }
+    )
+  )
+
+  // Register custom editor provider
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(
+      'markdown-editor.editor',
+      new MarkdownEditorProvider(context),
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+        supportsMultipleEditorsPerDocument: false,
       }
     )
   )
@@ -58,9 +88,9 @@ class EditorPanel {
       return
     }
     let doc: undefined | vscode.TextDocument
-    // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
+    // From the context menu: Check if there is a current Markdown editor in the currently open text editor, and if so, bind the document.
     if (uri) {
-      // 从右键打开文件，先打开文档然后开启自动同步，不然没法保存文件和同步到已经打开的document
+      // To open a file from the right-click menu, first open the document and then enable auto-sync; otherwise, you won't be able to save the file or sync it to the already opened document.
       doc = await vscode.workspace.openTextDocument(uri)
     } else {
       doc = vscode.window.activeTextEditor?.document
@@ -123,12 +153,12 @@ class EditorPanel {
     return vscode.workspace.getConfiguration('markdown-editor')
   }
 
-  private constructor(
+  public constructor(
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
     private readonly _extensionUri: vscode.Uri,
-    public _document: vscode.TextDocument, // 当前有 markdown 编辑器
-    public _uri = _document.uri // 从资源管理器打开，只有 uri 没有 _document
+    public _document: vscode.TextDocument,
+    public _uri = _document.uri
   ) {
     // Set the webview's initial html content
 
@@ -149,7 +179,6 @@ class EditorPanel {
       if (e.document.fileName !== this._document.fileName) {
         return
       }
-      // 当 webview panel 激活时不将由 webview编辑导致的 vsc 编辑器更新同步回 webview
       // don't change webview panel when webview panel is focus
       if (this._panel.active) {
         return
@@ -208,7 +237,7 @@ class EditorPanel {
             showError(message.content)
             break
           case 'edit': {
-            // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
+            // Sync to the VSC editor only when the webview is in edit mode to avoid repeated refreshing.
             if (this._panel.active) {
               await syncToEditor()
               this._updateEditTitle()

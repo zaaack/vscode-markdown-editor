@@ -24,7 +24,8 @@
   "activationEvents": [
     "onCommand:markdown-editor.openEditor",
     "onWebviewPanel:markdown-editor",
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onCustomEditor:markdown-editor.editor"
   ],
   "repository": {
     "type": "git",
@@ -80,6 +81,18 @@
         "command": "markdown-editor.openEditor",
         "mac": "cmd+shift+alt+m",
         "when": "editorTextFocus && editorLangId == markdown"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "markdown-editor.editor",
+        "displayName": "Markdown Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          }
+        ],
+        "priority": "default"
       }
     ]
   },
