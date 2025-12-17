@@ -24,7 +24,8 @@
   "activationEvents": [
     "onCommand:markdown-editor.openEditor",
     "onWebviewPanel:markdown-editor",
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "onCustomEditor:markdown-editor.customEditor"
   ],
   "repository": {
     "type": "git",
@@ -55,6 +56,21 @@
         }
       ]
     },
+    "customEditors": [
+      {
+        "viewType": "markdown-editor.customEditor",
+        "displayName": "Markdown Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.md"
+          },
+          {
+            "filenamePattern": "*.markdown"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
     "configuration": {
       "title": "markdown-editor",
       "properties": {
@@ -93,7 +109,7 @@
     "@types/vscode": "^1.47.0",
     "foy": "^0.2.5",
     "ts-node": "9.1.1",
-    "typescript": "4.2.2"
+    "typescript": "^4.2.2"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }
