@@ -78,7 +78,7 @@ function initVditor(msg) {
             return {
               base64: await fileToBase64(f),
               name: `${format(new Date(), 'yyyyMMdd_HHmmss')}_${f.name}`.replace(
-                /[^\w-_.]+/,
+                /[^\w-_.]+/g,
                 '_'
               ),
             }
@@ -88,6 +88,7 @@ function initVditor(msg) {
           command: 'upload',
           files: fileInfos,
         })
+        return null // indicate success to vditor
       },
     },
   })
