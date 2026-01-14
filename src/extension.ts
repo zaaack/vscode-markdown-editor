@@ -144,6 +144,19 @@ class EditorPanel {
         this.dispose()
       }
     }, this._disposables)
+    // re-init webview when VS Code theme changes
+    vscode.window.onDidChangeActiveColorTheme((theme) => {
+      this._update({
+        type: 'init',
+        options: {
+          useVscodeThemeColor: EditorPanel.config.get<boolean>(
+            'useVscodeThemeColor'
+          ),
+          ...this._context.globalState.get(KeyVditorOptions),
+        },
+        theme: theme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
+      })
+    }, null, this._disposables)
     // update EditorPanel when vsc editor changes
     vscode.workspace.onDidChangeTextDocument((e) => {
       if (e.document.fileName !== this._document.fileName) {

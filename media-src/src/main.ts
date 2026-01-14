@@ -23,17 +23,6 @@ function initVditor(msg) {
   console.log('msg', msg)
   let inputTimer
   let defaultOptions: any = {}
-  if (msg.theme === 'dark') {
-    // vditor.setTheme('dark', 'dark')
-    defaultOptions = merge(defaultOptions, {
-      theme: 'dark',
-      preview: {
-        theme: {
-          current: 'dark',
-        },
-      }
-    })
-  }
   defaultOptions = merge(defaultOptions, msg.options, {
     preview: {
       math: {
@@ -41,6 +30,16 @@ function initVditor(msg) {
       }
     }
   })
+  // Apply theme from VS Code AFTER merge so it takes precedence over stored options
+  if (msg.theme === 'dark') {
+    defaultOptions.theme = 'dark'
+    defaultOptions.preview = defaultOptions.preview || {}
+    defaultOptions.preview.theme = { current: 'dark' }
+  } else if (msg.theme === 'light') {
+    defaultOptions.theme = 'classic'
+    defaultOptions.preview = defaultOptions.preview || {}
+    defaultOptions.preview.theme = { current: 'light' }
+  }
   if (window.vditor) {
     vditor.destroy()
     window.vditor = null
