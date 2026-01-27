@@ -109,7 +109,7 @@ window.addEventListener('message', (e) => {
         } catch (error) {
           // reset options when error
           console.error(error)
-          initVditor({content: msg.content})
+          initVditor({ content: msg.content })
           saveVditorOptions()
         }
         console.log('initVditor')

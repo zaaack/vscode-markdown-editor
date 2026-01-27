@@ -8,16 +8,16 @@
 
 ## Features
 
-- What You See Is What You Get (WYSIWYG)
-- Auto sync changes between the VSCode editor and webview
-- Copy markdown/html
-- Uploaded/pasted/drag-dropped images will be auto-saved to the `assets` folder
-- Multi-theme support
-- Shortcut keys
-- Multiple editting modes: instant Rendering mode (**Recommand!**) / WYSIWYG mode / split screen mode
-- Markdown extensions
-- Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
-- For more usage please see [vditor](https://github.com/Vanessa219/vditor)
+1. What You See Is What You Get (WYSIWYG)
+2. Auto sync changes between the VSCode editor and webview
+3. Copy markdown/html
+4. Uploaded/pasted/drag-dropped images will be auto-saved to the `assets` folder
+5. Multi-theme support
+6. Shortcut keys
+7. Multiple editti[](https://)ng modes: instant Rendering mode (**Recommand!**) / WYSIWYG mode / split screen mode
+8. Markdown extensions
+9. Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
+10. For more usage please see [vditor](https://github.com/Vanessa219/vditor)
 
 ## Install
 
@@ -49,6 +49,14 @@
 
 - right click on a opened markdown file's tab title
 - then click `Open with markdown editor`
+
+
+### 5. Open With... and Set Default Editor
+
+- right click on a markdown file in Explorer
+- click `Open With...`
+- select `Markdown Editor` to open temporary
+- or click `Configure default editor...` and select `Markdown Editor` to set it as default
 
 ### Custom CSS (custom layout and vditor personalization)
 

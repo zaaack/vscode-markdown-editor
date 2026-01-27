@@ -11,12 +11,27 @@ function showError(msg: string) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  // Register original command (used by context menu/shortcuts)
   context.subscriptions.push(
     vscode.commands.registerCommand(
       'markdown-editor.openEditor',
       (uri?: vscode.Uri, ...args) => {
         debug('command', uri, args)
         EditorPanel.createOrShow(context, uri)
+      }
+    )
+  )
+
+  // Register CustomTextEditorProvider (for "Open With" and default editor)
+  context.subscriptions.push(
+    vscode.window.registerCustomEditorProvider(
+      MarkdownEditorProvider.viewType,
+      new MarkdownEditorProvider(context),
+      {
+        webviewOptions: {
+          retainContextWhenHidden: true,
+        },
+        supportsMultipleEditorsPerDocument: false,
       }
     )
   )
@@ -58,9 +73,9 @@ class EditorPanel {
       return
     }
     let doc: undefined | vscode.TextDocument
-    // from context menu : 从当前打开的 textEditor 中寻找 是否有当前 markdown 的 editor, 有的话则绑定 document
+    // From context menu: Find if there is a markdown editor for the current active TextEditor, if so bind the document
     if (uri) {
-      // 从右键打开文件，先打开文档然后开启自动同步，不然没法保存文件和同步到已经打开的document
+      // Open file from context menu: Open document first then enable auto-sync, otherwise cannot save file or sync to opened document
       doc = await vscode.workspace.openTextDocument(uri)
     } else {
       doc = vscode.window.activeTextEditor?.document
@@ -110,7 +125,7 @@ class EditorPanel {
       // Enable javascript in the webview
       enableScripts: true,
 
-            localResourceRoots: [vscode.Uri.file("/"), ...this.getFolders()],
+      localResourceRoots: [vscode.Uri.file("/"), ...this.getFolders()],
       retainContextWhenHidden: true,
       enableCommandUris: true,
     }
@@ -127,8 +142,8 @@ class EditorPanel {
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
     private readonly _extensionUri: vscode.Uri,
-    public _document: vscode.TextDocument, // 当前有 markdown 编辑器
-    public _uri = _document.uri // 从资源管理器打开，只有 uri 没有 _document
+    public _document: vscode.TextDocument,
+    public _uri = _document.uri // Opened from explorer, only uri exists, no _document
   ) {
     // Set the webview's initial html content
 
@@ -149,7 +164,7 @@ class EditorPanel {
       if (e.document.fileName !== this._document.fileName) {
         return
       }
-      // 当 webview panel 激活时不将由 webview编辑导致的 vsc 编辑器更新同步回 webview
+      // When webview panel is active, do not sync updates from VS Code editor caused by webview edits back to webview
       // don't change webview panel when webview panel is focus
       if (this._panel.active) {
         return
@@ -193,7 +208,7 @@ class EditorPanel {
               },
               theme:
                 vscode.window.activeColorTheme.kind ===
-                vscode.ColorThemeKind.Dark
+                  vscode.ColorThemeKind.Dark
                   ? 'dark'
                   : 'light',
             })
@@ -208,7 +223,7 @@ class EditorPanel {
             showError(message.content)
             break
           case 'edit': {
-            // 只有当 webview 处于编辑状态时才同步到 vsc 编辑器，避免重复刷新
+            // Only sync to VS Code editor when webview is in edit mode to avoid repeated refresh
             if (this._panel.active) {
               await syncToEditor()
               this._updateEditTitle()
@@ -352,6 +367,213 @@ class EditorPanel {
       NodePath.dirname(
         webview.asWebviewUri(vscode.Uri.file(this._fsPath)).toString()
       ) + '/'
+    const toMediaPath = (f: string) => `media/dist/${f}`
+    const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
+    const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
+
+    return (
+      `<!DOCTYPE html>
+			<html lang="en">
+			<head>
+				<meta charset="UTF-8">
+
+				<meta name="viewport" content="width=device-width, initial-scale=1.0">
+				<base href="${baseHref}" />
+
+
+				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
+
+				<title>markdown editor</title>
+        <style>` +
+      EditorPanel.config.get<string>('customCss') +
+      `</style>
+			</head>
+			<body>
+				<div id="app"></div>
+
+
+				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
+			</body>
+			</html>`
+    )
+  }
+}
+
+/**
+ * MarkdownEditorProvider implements CustomTextEditorProvider interface
+ * Supports opening markdown files via "Open With"
+ */
+class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
+  public static readonly viewType = 'markdown-editor.customEditor'
+
+  constructor(private readonly context: vscode.ExtensionContext) { }
+
+  /**
+   * Called when user selects Markdown Editor via "Open With"
+   */
+  public async resolveCustomTextEditor(
+    document: vscode.TextDocument,
+    webviewPanel: vscode.WebviewPanel,
+    _token: vscode.CancellationToken
+  ): Promise<void> {
+    // Set webview options
+    webviewPanel.webview.options = this.getWebviewOptions()
+
+    // Init webview content
+    const uri = document.uri
+    webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview, uri)
+    webviewPanel.title = NodePath.basename(uri.fsPath)
+
+    const disposables: vscode.Disposable[] = []
+    let isEditing = false
+
+    // Update title to show edit status
+    const updateEditTitle = () => {
+      const isDirty = document.isDirty
+      if (isDirty !== isEditing) {
+        isEditing = isDirty
+        webviewPanel.title = `${isDirty ? '[edit]' : ''}${NodePath.basename(uri.fsPath)}`
+      }
+    }
+
+    // Send update to webview
+    const updateWebview = (props: { type?: 'init' | 'update'; options?: any; theme?: 'dark' | 'light' } = {}) => {
+      webviewPanel.webview.postMessage({
+        command: 'update',
+        content: document.getText(),
+        ...props,
+      })
+    }
+
+    // Listen for document close
+    vscode.workspace.onDidCloseTextDocument((e) => {
+      if (e.fileName === uri.fsPath) {
+        webviewPanel.dispose()
+      }
+    }, null, disposables)
+
+    // Listen for document changes (sync from external editor to webview)
+    vscode.workspace.onDidChangeTextDocument((e) => {
+      if (e.document.fileName !== document.fileName) {
+        return
+      }
+      // Do not sync when webview panel is active (avoid circular updates)
+      if (webviewPanel.active) {
+        return
+      }
+      updateWebview()
+      updateEditTitle()
+    }, null, disposables)
+
+    // Handle messages from webview
+    webviewPanel.webview.onDidReceiveMessage(async (message) => {
+      debug('msg from webview', message, webviewPanel.active)
+
+      const syncToEditor = async () => {
+        const edit = new vscode.WorkspaceEdit()
+        edit.replace(
+          document.uri,
+          new vscode.Range(0, 0, document.lineCount, 0),
+          message.content
+        )
+        await vscode.workspace.applyEdit(edit)
+      }
+
+      switch (message.command) {
+        case 'ready':
+          updateWebview({
+            type: 'init',
+            options: {
+              useVscodeThemeColor: EditorPanel.config.get<boolean>('useVscodeThemeColor'),
+              ...this.context.globalState.get(KeyVditorOptions),
+            },
+            theme: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
+          })
+          break
+        case 'save-options':
+          this.context.globalState.update(KeyVditorOptions, message.options)
+          break
+        case 'info':
+          vscode.window.showInformationMessage(message.content)
+          break
+        case 'error':
+          showError(message.content)
+          break
+        case 'edit':
+          if (webviewPanel.active) {
+            await syncToEditor()
+            updateEditTitle()
+          }
+          break
+        case 'reset-config':
+          await this.context.globalState.update(KeyVditorOptions, {})
+          break
+        case 'save':
+          await syncToEditor()
+          await document.save()
+          updateEditTitle()
+          break
+        case 'upload': {
+          const assetsFolder = EditorPanel.getAssetsFolder(uri)
+          try {
+            await vscode.workspace.fs.createDirectory(vscode.Uri.file(assetsFolder))
+          } catch (error) {
+            console.error(error)
+            showError(`Invalid image folder: ${assetsFolder}`)
+          }
+          await Promise.all(
+            message.files.map(async (f: any) => {
+              const content = Buffer.from(f.base64, 'base64')
+              return vscode.workspace.fs.writeFile(
+                vscode.Uri.file(NodePath.join(assetsFolder, f.name)),
+                content
+              )
+            })
+          )
+          const files = message.files.map((f: any) =>
+            NodePath.relative(NodePath.dirname(uri.fsPath), NodePath.join(assetsFolder, f.name)).replace(/\\/g, '/')
+          )
+          webviewPanel.webview.postMessage({
+            command: 'uploaded',
+            files,
+          })
+          break
+        }
+        case 'open-link': {
+          let url = message.href
+          if (!/^http/.test(url)) {
+            url = NodePath.resolve(uri.fsPath, '..', url)
+          }
+          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url))
+          break
+        }
+      }
+    }, null, disposables)
+
+    // Clean up resources
+    webviewPanel.onDidDispose(() => {
+      disposables.forEach((d) => d.dispose())
+    })
+  }
+
+  private static getFolders(): vscode.Uri[] {
+    const data = []
+    for (let i = 65; i <= 90; i++) {
+      data.push(vscode.Uri.file(`${String.fromCharCode(i)}:/`))
+    }
+    return data
+  }
+
+  private getWebviewOptions(): vscode.WebviewOptions {
+    return {
+      enableScripts: true,
+      localResourceRoots: [vscode.Uri.file('/'), ...MarkdownEditorProvider.getFolders()],
+    }
+  }
+
+  private getHtmlForWebview(webview: vscode.Webview, uri: vscode.Uri): string {
+    const toUri = (f: string) => webview.asWebviewUri(vscode.Uri.joinPath(this.context.extensionUri, f))
+    const baseHref = NodePath.dirname(webview.asWebviewUri(vscode.Uri.file(uri.fsPath)).toString()) + '/'
     const toMediaPath = (f: string) => `media/dist/${f}`
     const JsFiles = ['main.js'].map(toMediaPath).map(toUri)
     const CssFiles = ['main.css'].map(toMediaPath).map(toUri)
