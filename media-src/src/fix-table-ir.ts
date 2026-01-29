@@ -3,9 +3,9 @@
  */
 import { keyboard } from '@testing-library/user-event/dist/keyboard'
 import $ from 'jquery'
-import { i18n } from 'vditor/src/ts/i18n/index'
+// import { i18n } from 'vditor/src/ts/i18n/index'
 import { updateHotkeyTip } from 'vditor/src/ts/util/compatibility'
-import { lang } from './lang'
+// import { lang } from './lang'
 
 const tablePanelId = 'fix-table-ir-wrapper'
 let disableVscodeHotkeys = false
@@ -26,63 +26,63 @@ export function fixTableIr() {
   >
    <button
       type="button"
-      aria-label="${i18n[lang].alignLeft}<${updateHotkeyTip('⇧⌘L')}>"
+      aria-label="${window.VditorI18n.alignLeft}<${updateHotkeyTip('⇧⌘L')}>"
       data-type="left"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n vditor-icon--current"
     >
       <svg><use xlink:href="#vditor-icon-align-left"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang].alignCenter}<${updateHotkeyTip('⇧⌘C')}>"
+      aria-label="${window.VditorI18n.alignCenter}<${updateHotkeyTip('⇧⌘C')}>"
       data-type="center"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-align-center"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang].alignRight}<${updateHotkeyTip('⇧⌘R')}>"
+      aria-label="${window.VditorI18n.alignRight}<${updateHotkeyTip('⇧⌘R')}>"
       data-type="right"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-align-right"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang].insertRowAbove}<${updateHotkeyTip('⇧⌘F')}>"
+      aria-label="${window.VditorI18n.insertRowAbove}<${updateHotkeyTip('⇧⌘F')}>"
       data-type="insertRowA"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-insert-rowb"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang].insertRowBelow}<${updateHotkeyTip('⌘=')}>"
+      aria-label="${window.VditorI18n.insertRowBelow}<${updateHotkeyTip('⌘=')}>"
       data-type="insertRowB"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-insert-row"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang].insertColumnLeft}<${updateHotkeyTip('⇧⌘G')}>"
+      aria-label="${window.VditorI18n.insertColumnLeft}<${updateHotkeyTip('⇧⌘G')}>"
       data-type="insertColumnL"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-insert-columnb"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang].insertColumnRight}<${updateHotkeyTip('⇧⌘=')}>"
+      aria-label="${window.VditorI18n.insertColumnRight}<${updateHotkeyTip('⇧⌘=')}>"
       data-type="insertColumnR"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-insert-column"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang]['delete-row']}<${updateHotkeyTip('⌘-')}>"
+      aria-label="${window.VditorI18n['delete-row']}<${updateHotkeyTip('⌘-')}>"
       data-type="deleteRow"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >
       <svg><use xlink:href="#vditor-icon-delete-row"></use></svg></button
     ><button
       type="button"
-      aria-label="${i18n[lang]['delete-column']}<${updateHotkeyTip('⇧⌘-')}>"
+      aria-label="${window.VditorI18n['delete-column']}<${updateHotkeyTip('⇧⌘-')}>"
       data-type="deleteColumn"
       class="vditor-icon vditor-tooltipped vditor-tooltipped__n"
     >

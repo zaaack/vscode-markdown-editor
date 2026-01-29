@@ -27,3 +27,7 @@ jobs:
         id: publishToOpenVSX
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
+      - name: Upload VSIX as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{ steps.publishToOpenVSX.outputs.vsixPath }}
