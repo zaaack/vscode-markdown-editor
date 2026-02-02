@@ -304,9 +304,9 @@ undici-types@~6.11.1:
   resolved "https://registry.npmmirror.com/undici-types/-/undici-types-6.11.1.tgz#432ea6e8efd54a48569705a699e62d8f4981b197"
   integrity sha512-mIDEX2ek50x0OlRgxryxsenE5XaQD4on5U2inY7RApK3SOJpofyw7uW2AyfMKkhAxXIceo2DeWGVGwyvng1GNQ==
 
-vditor@^3.8.4:
-  version "3.8.4"
-  resolved "https://registry.npmmirror.com/vditor/-/vditor-3.8.4.tgz#5b68e127de83f31f3df1d5d0d512e6b100e98b04"
-  integrity sha1-W2jhJ96D8x898dXQ1RLmsQDpiwQ=
+vditor@^3.11.1:
+  version "3.11.2"
+  resolved "https://registry.yarnpkg.com/vditor/-/vditor-3.11.2.tgz#612a405c74b71278a4eea188db3c7d93c0884c11"
+  integrity sha512-8QguQQUPWbBFocnfQmWjz4jiykQnvsmCuhOomGIVVK7vc+dQq2h8w9qQQuEjUTZpnZT5fEdYbj4aLr1NGdAZaA==
   dependencies:
     diff-match-patch "^1.0.5"
