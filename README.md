@@ -16,7 +16,7 @@
 6. Shortcut keys
 7. Multiple editti[](https://)ng modes: instant Rendering mode (**Recommand!**) / WYSIWYG mode / split screen mode
 8. Markdown extensions
-9. Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notation) / ...
+9. Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notatioan) / ...
 10. For more usage please see [vditor](https://github.com/Vanessa219/vditor)
 
 ## Install
@@ -50,7 +50,6 @@
 - right click on a opened markdown file's tab title
 - then click `Open with markdown editor`
 
-
 ### 5. Open With... and Set Default Editor
 
 - right click on a markdown file in Explorer
@@ -72,6 +71,7 @@ Edit your settings.json and add
 
 - [vscode](https://github.com/microsoft/vscode)
 - [vditor](https://github.com/Vanessa219/vditor)
+
 
 ## Todo
 
