@@ -3,14 +3,14 @@ setGlobalOptions({ loading: false, strict: true })
 task('watch', async (ctx) => {
   // Your build tasks
   await Promise.all([
-    ctx.exec('tsc -w -p ./'),
+    ctx.exec('pnpm run watch:ext'),
     ctx.cd('./media-src').exec('pnpm start'),
   ])
 })
 
 task('build', async (ctx) => {
   await Promise.all([
-    ctx.exec('tsc -p ./'),
+    ctx.exec('pnpm run build:ext'),
     ctx.cd('./media-src').exec('pnpm build'),
   ])
   await ctx.exec('git add -A')

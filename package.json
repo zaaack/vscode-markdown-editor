@@ -1,13 +1,13 @@
 {
   "name": "markdown-editor",
-  "displayName": "Markdown Editor",
+  "displayName": "Improved Markdown Editor",
   "icon": "media/logo.png",
   "description": "A full-featured WYSIWYG editor for markdown.",
   "version": "0.1.14",
   "publisher": "zaaack",
   "private": true,
   "engines": {
-    "vscode": "^1.47.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Programming Languages",
@@ -21,12 +21,6 @@
     "markdown-previewer",
     "markdown-editor"
   ],
-  "activationEvents": [
-    "onCommand:markdown-editor.openEditor",
-    "onWebviewPanel:markdown-editor",
-    "onLanguage:markdown",
-    "onCustomEditor:markdown-editor.customEditor"
-  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/zaaack/vscode-markdown-editor.git"
@@ -36,8 +30,8 @@
     "commands": [
       {
         "command": "markdown-editor.openEditor",
-        "title": "Open with markdown editor",
-        "category": "markdown-editor"
+        "title": "Open with Improved Markdown Editor",
+        "category": "Improved Markdown Editor"
       }
     ],
     "menus": {
@@ -59,7 +53,7 @@
     "customEditors": [
       {
         "viewType": "markdown-editor.customEditor",
-        "displayName": "Markdown Editor",
+        "displayName": "Improved Markdown Editor",
         "selector": [
           {
             "filenamePattern": "*.md"
@@ -72,7 +66,7 @@
       }
     ],
     "configuration": {
-      "title": "markdown-editor",
+      "title": "Improved Markdown Editor",
       "properties": {
         "markdown-editor.imageSaveFolder": {
           "type": "string",
@@ -100,13 +94,17 @@
     ]
   },
   "scripts": {
+    "build:ext": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=out/extension.js",
+    "watch:ext": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=out/extension.js --watch",
     "watch": "foy watch",
     "start": "foy watch",
+    "test": "node --test test/regression.test.mjs",
     "pub": "foy build && npm version patch && git push origin master --tags && vsce package && vsce publish"
   },
   "devDependencies": {
     "@types/node": "^12.12.0",
     "@types/vscode": "^1.47.0",
+    "esbuild": "^0.24.0",
     "foy": "^0.2.5",
     "ts-node": "9.1.1",
     "typescript": "^4.2.2"
