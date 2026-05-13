@@ -4,21 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>markdown editor</title>
-
-    <!-- <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/vditor@3.8.4/dist/index.css"
-    /> -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vditor@3.8.4/dist/index.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js"></script>
-
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/dist/jquery-confirm.min.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/jquery-confirm@3.3.4/css/jquery-confirm.css"
-    /> -->
     <link rel="stylesheet" href="./dist/main.css" />
+    <style>
+      #ln-gutter {
+        position: absolute;
+        top: 0; left: 0;
+        width: 32px;
+        pointer-events: none;
+        user-select: none;
+        z-index: 10;
+        border-right: 1px solid rgba(128,128,128,0.12);
+      }
+      #ln-gutter .ln {
+        position: absolute;
+        width: 26px;
+        text-align: right;
+        font-size: 11px;
+        font-family: 'Cascadia Code', 'Consolas', monospace;
+        color: rgba(150,150,150,0.5);
+        line-height: 1;
+      }
+    </style>
   </head>
   <body>
     <div id="app"></div>
@@ -27,31 +33,67 @@
       window.postMessage(
         {
           command: 'update',
-          content: `# test
-
-> aaa
-
-| col1 | col2 | col3 |
-| ---- | ---- | ---- |
-|      |   aaaaaaaaa   |      |
-|      |      |      |`,
+          content: '# Heading 1\n\nA paragraph of text.\n\n## Heading 2\n\n> A blockquote\n\nAnother paragraph.\n\n- list item 1\n- list item 2\n\n```js\nconst x = 1;\nconsole.log(x);\n```\n\nFinal paragraph.\n\n### Heading 3\n\nMore text here to test scrolling behavior with a longer document.\n\n| Col A | Col B |\n|-------|-------|\n| 1     | 2     |\n\n> Another blockquote at the end.\n\nThe very last line.',
           theme: 'dark',
           type: 'init',
         },
         '*'
-      )
-      let timer = setTimeout(() => {
-        vditor.vditor.ir.element.addEventListener('keydown', (e) =>
-          console.log('vkd', e)
-        )
-        let ev = new KeyboardEvent('keydown', {
-          key: '=',
-          code: 'Equal',
-          keyCode: 187,
-          metaKey: true,
-        })
-        vditor.vditor.ir.element.dispatchEvent(ev)
-      }, 3000)
+      );
+    </script>
+    <script>
+      var lnTimer = setInterval(function(){
+        var reset = document.querySelector('.vditor-ir .vditor-reset');
+        if(!reset || reset.children.length === 0) return;
+        clearInterval(lnTimer);
+
+        // Override the !important padding from CSS
+        reset.style.setProperty('padding-left', '60px', 'important');
+        var tb = document.querySelector('.vditor-toolbar');
+        if(tb) tb.style.setProperty('padding-left', '60px', 'important');
+
+        var ir = document.querySelector('.vditor-ir');
+        ir.style.position = 'relative';
+
+        var g = document.createElement('div');
+        g.id = 'ln-gutter';
+        ir.insertBefore(g, ir.firstChild);
+
+        function sync(){
+          if(!reset) return;
+          var kids = [];
+          for(var j=0; j<reset.children.length; j++){
+            var c = reset.children[j];
+            if(c.offsetHeight > 0 && c.id !== 'ln-gutter' && c.id !== 'fix-table-ir-wrapper') kids.push(c);
+          }
+          g.style.height = reset.scrollHeight + 'px';
+          var html = '';
+          for(var j=0; j<kids.length; j++){
+            var el = kids[j];
+            var style = window.getComputedStyle(el);
+            var tag = el.tagName;
+            var fs = parseFloat(style.fontSize) || 16;
+            var pt = parseFloat(style.paddingTop) || 0;
+            var mt = parseFloat(style.marginTop) || 0;
+            var lh = parseFloat(style.lineHeight);
+            if(isNaN(lh)) lh = fs * 1.6;
+            var top;
+            if(tag === 'DIV' && el.querySelector('pre,code')) {
+              var code = el.querySelector('code') || el.querySelector('pre');
+              var cStyle = code ? window.getComputedStyle(code) : style;
+              var cfs = parseFloat(cStyle.fontSize) || 14;
+              top = el.offsetTop + pt + (cfs * 1.6 / 2) - 5;
+            } else {
+              top = el.offsetTop + pt + (lh / 2) - 5;
+            }
+            html += '<div class="ln" style="top:'+top+'px">'+(j+1)+'</div>';
+          }
+          g.innerHTML = html;
+        }
+
+        sync();
+        ir.addEventListener('scroll', sync);
+        new MutationObserver(function(){ requestAnimationFrame(sync); }).observe(reset, {childList:true, subtree:true, characterData:true});
+      }, 300);
     </script>
   </body>
 </html>
