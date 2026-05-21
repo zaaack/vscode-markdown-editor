@@ -14,14 +14,53 @@
 4. Uploaded/pasted/drag-dropped images will be auto-saved to the `assets` folder
 5. Multi-theme support
 6. Shortcut keys
-7. Multiple editti[](https://)ng modes: instant Rendering mode (**Recommand!**) / WYSIWYG mode / split screen mode
+7. Multiple editing modes: instant Rendering mode (**Recommend!**) / WYSIWYG mode / split screen mode
 8. Markdown extensions
-9. Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js(notatioan) / ...
+9. Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js (notation) / ...
 10. For more usage please see [vditor](https://github.com/Vanessa219/vditor)
 
-## Install
+## Local Development / Installation
 
-[https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor](https://marketplace.visualstudio.com/items?itemName=zaaack.markdown-editor)
+To install and run the extension locally:
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v16+)
+- [pnpm](https://pnpm.io/) (`npm install -g pnpm`)
+- [VS Code](https://code.visualstudio.com/)
+
+### Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/zaaack/vscode-markdown-editor.git
+cd vscode-markdown-editor
+
+# Install dependencies
+pnpm install
+cd media-src && pnpm install && cd ..
+
+# Build the extension
+npx foy build
+```
+
+### Run in Development Mode
+
+1. Open the project in VS Code
+2. Press `F5` to launch the Extension Development Host
+3. A new VS Code window will open with the extension loaded
+
+### Install as Local Extension
+
+```bash
+# Package the extension
+npx vsce package
+
+# Install the generated .vsix file
+code --install-extension better-markdown-editor-*.vsix
+```
+
+Alternatively, in VS Code: Extensions view → `...` menu → "Install from VSIX..." and select the generated `.vsix` file.
 
 ## Local Development / Installation
 
