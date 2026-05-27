@@ -53,6 +53,12 @@ export const toolbar = [
 			vscode.postMessage({ command: 'find' })
 		},
 	},
+	{
+		name: 'outline',
+		tipPosition: 's',
+		tip: 'Outline',
+		icon: '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="17" height="17"><path d="M3 5h18v2H3V5zm3 4h15v2H6V9zm-3 4h18v2H3v-2zm3 4h15v2H6v-2z" fill="currentColor"/></svg>',
+	},
 	'|',
 	{ name: 'edit-mode', tipPosition: 'e', },
 	{
@@ -62,7 +68,6 @@ export const toolbar = [
 			'both',
 			'code-theme',
 			'content-theme',
-			'outline',
 			'preview',
 			{
 				name: 'copy-markdown',
