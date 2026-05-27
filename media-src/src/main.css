@@ -15,6 +15,12 @@ body[data-use-vscode-theme-color="1"] .vditor {
   --toolbar-background-color: var(--vscode-editor-background);
   --textarea-background-color: var(--vscode-editor-background);
 }
+body[data-highlight-headings="1"] .vditor-reset :is(h1, h2, h3, h4, h5, h6) {
+  background-color: var(--vscode-editor-selectionHighlightBackground);
+  color: var(--vscode-editor-foreground);
+  padding: 4px 8px;
+  border-radius: 3px;
+}
 /* fix font family */
 .vditor .vditor-reset {
   font-family: var(--vscode-editor-font-family)!important;

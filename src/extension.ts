@@ -169,6 +169,9 @@ class EditorPanel {
           useVscodeThemeColor: EditorPanel.config.get<boolean>(
             'useVscodeThemeColor'
           ),
+          highlightHeadings: EditorPanel.config.get<boolean>(
+            'highlightHeadings'
+          ),
           ...this._context.globalState.get(KeyVditorOptions),
         },
         theme: theme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
@@ -218,6 +221,9 @@ class EditorPanel {
               options: {
                 useVscodeThemeColor: EditorPanel.config.get<boolean>(
                   'useVscodeThemeColor'
+                ),
+                highlightHeadings: EditorPanel.config.get<boolean>(
+                  'highlightHeadings'
                 ),
                 ...this._context.globalState.get(KeyVditorOptions),
               },
@@ -504,6 +510,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
             type: 'init',
             options: {
               useVscodeThemeColor: EditorPanel.config.get<boolean>('useVscodeThemeColor'),
+              highlightHeadings: EditorPanel.config.get<boolean>('highlightHeadings'),
               ...this.context.globalState.get(KeyVditorOptions),
             },
             theme: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',

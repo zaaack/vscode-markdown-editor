@@ -120,6 +120,10 @@ window.addEventListener('message', (e) => {
         } else {
           document.body.setAttribute('data-use-vscode-theme-color', '0')
         }
+        document.body.setAttribute(
+          'data-highlight-headings',
+          msg.options && msg.options.highlightHeadings ? '1' : '0'
+        )
         try {
           initVditor(msg)
         } catch (error) {
