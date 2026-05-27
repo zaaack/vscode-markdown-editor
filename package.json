@@ -89,6 +89,12 @@
           "default": false,
           "description": "Apply a themed background and foreground color to headings (h1–h6) for easier scanning of long documents."
         },
+        "markdown-editor.outlinePosition": {
+          "type": "string",
+          "enum": ["left", "right"],
+          "default": "right",
+          "description": "Which side of the editor the outline panel opens on when toggled from the toolbar."
+        },
         "markdown-editor.customCss": {
           "type": "string",
           "default": ""

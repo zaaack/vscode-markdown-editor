@@ -47,6 +47,12 @@ function initVditor(msg) {
       }
     }
   })
+  if (msg.options?.outlinePosition) {
+    defaultOptions.outline = {
+      ...(defaultOptions.outline || {}),
+      position: msg.options.outlinePosition,
+    }
+  }
   // Apply theme from VS Code AFTER merge so it takes precedence over stored options
   if (msg.theme === 'dark') {
     defaultOptions.theme = 'dark'
