@@ -43,7 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 /**
  * Manages cat coding webview panels
  */
-class EditorPanel {
+export class EditorPanel {
   /**
    * Track the currently panel. Only allow a single panel to exist at a time.
    */
@@ -52,6 +52,7 @@ class EditorPanel {
   public static readonly viewType = 'markdown-editor'
 
   private _disposables: vscode.Disposable[] = []
+  private _textEditTimer: NodeJS.Timeout | undefined
 
   public static async createOrShow(
     context: vscode.ExtensionContext,
@@ -154,13 +155,12 @@ class EditorPanel {
     // Listen for when the panel is disposed
     // This happens when the user closes the panel or when the panel is closed programmatically
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
-    let textEditTimer: NodeJS.Timeout | void
     // close EditorPanel when vsc editor is close
     vscode.workspace.onDidCloseTextDocument((e) => {
       if (e.fileName === this._fsPath) {
         this.dispose()
       }
-    }, this._disposables)
+    }, null, this._disposables)
     // re-init webview when VS Code theme changes
     vscode.window.onDidChangeActiveColorTheme((theme) => {
       this._update({
@@ -190,12 +190,13 @@ class EditorPanel {
       if (this._panel.active) {
         return
       }
-      textEditTimer && clearTimeout(textEditTimer)
-      textEditTimer = setTimeout(() => {
+      if (this._textEditTimer) clearTimeout(this._textEditTimer)
+      this._textEditTimer = setTimeout(() => {
+        this._textEditTimer = undefined
         this._update()
         this._updateEditTitle()
       }, 300)
-    }, this._disposables)
+    }, null, this._disposables)
     // Handle messages from the webview
     this._panel.webview.onDidReceiveMessage(
       async (message) => {
@@ -340,6 +341,14 @@ class EditorPanel {
 
   public dispose() {
     EditorPanel.currentPanel = undefined
+
+    // Clear any pending debounced text-change update so it doesn't
+    // fire after the panel is gone and try to postMessage on a
+    // disposed webview.
+    if (this._textEditTimer) {
+      clearTimeout(this._textEditTimer)
+      this._textEditTimer = undefined
+    }
 
     // Clean up our resources
     this._panel.dispose()

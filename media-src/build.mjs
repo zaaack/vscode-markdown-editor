@@ -7,10 +7,25 @@
 // src/stubs/vditor-toolbar-stubs.ts for the rationale.
 
 import * as esbuild from 'esbuild'
+import * as fs from 'fs'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Vditor declares `VDITOR_VERSION` as an ambient const in its TS sources
+// (vditor/src/ts/constants.ts:1) and relies on its bundler (webpack
+// DefinePlugin) to substitute the actual version string at build time.
+// Now that we consume Vditor via source-import instead of its
+// pre-bundled UMD, we have to perform the same substitution ourselves —
+// otherwise the reference becomes a `ReferenceError: VDITOR_VERSION is
+// not defined` at first paint and the entire webview stays blank.
+const vditorPkg = JSON.parse(
+  fs.readFileSync(
+    path.resolve(__dirname, 'node_modules/vditor/package.json'),
+    'utf8'
+  )
+)
 
 const args = new Set(process.argv.slice(2))
 const watch = args.has('--watch')
@@ -43,6 +58,25 @@ const config = {
   minify,
   sourcemap: true,
   outfile: '../media/dist/main.js',
+  define: {
+    VDITOR_VERSION: JSON.stringify(vditorPkg.version),
+  },
+  // Vditor's TS uses the legacy class-field semantics: subclasses
+  // (Emoji, Both, EditMode, …) declare `public element: HTMLElement;`
+  // without an initializer, then rely on `super()` to populate it
+  // before the subclass body uses `this.element`. esbuild's default
+  // (useDefineForClassFields=true, equivalent to `Object.defineProperty`)
+  // re-defines the field on the instance to `undefined` AFTER super
+  // returns — which then crashes with
+  //   "Cannot read properties of undefined (reading 'appendChild')"
+  // in MenuItem.ts:34.
+  // Telling esbuild to use TS's legacy assignment semantics matches
+  // Vditor's own webpack/tsc build output.
+  tsconfigRaw: {
+    compilerOptions: {
+      useDefineForClassFields: false,
+    },
+  },
   plugins: [stubUnusedVditorButtons],
   logLevel: 'info',
 }
