@@ -119,9 +119,9 @@
   "scripts": {
     "watch": "foy watch",
     "start": "foy watch",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:bench": "vitest bench",
+    "test": "vitest run --config test/vitest.config.ts",
+    "test:watch": "vitest --config test/vitest.config.ts",
+    "test:bench": "vitest bench --config test/vitest.config.ts",
     "pub": "foy build && npm version patch && git push origin master --tags && vsce package && vsce publish"
   },
   "devDependencies": {
