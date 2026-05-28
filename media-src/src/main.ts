@@ -15,6 +15,7 @@ import 'vditor/dist/index.css'
 import { t, lang } from './lang'
 import { toolbar } from './toolbar'
 import { fixTableIr } from './fix-table-ir'
+import { EDIT_DEBOUNCE_MS } from './config'
 import './main.css'
 
 function deepMerge(target: any, ...sources: any[]): any {
@@ -88,7 +89,7 @@ function initVditor(msg) {
       inputTimer && clearTimeout(inputTimer)
       inputTimer = setTimeout(() => {
         vscode.postMessage({ command: 'edit', content: vditor.getValue() })
-      }, 100)
+      }, EDIT_DEBOUNCE_MS)
     },
     upload: {
       url: '/fuzzy', // 没有 url 参数粘贴图片无法上传 see: https://github.com/Vanessa219/vditor/blob/d7628a0a7cfe5d28b055469bf06fb0ba5cfaa1b2/src/ts/util/fixBrowserBehavior.ts#L1409
