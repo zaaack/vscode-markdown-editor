@@ -122,6 +122,89 @@ describe('message handler logic', () => {
   })
 })
 
+describe('outlinePosition handling', () => {
+  // Replicate the outlinePosition merge logic from main.ts's initVditor
+  function applyOutlinePosition(msg: any, defaultOptions: any) {
+    if (msg.options?.outlinePosition) {
+      defaultOptions.outline = {
+        ...(defaultOptions.outline || {}),
+        position: msg.options.outlinePosition,
+      }
+    }
+    return defaultOptions
+  }
+
+  it("sets defaultOptions.outline.position to 'right' when option is 'right'", () => {
+    const msg = { options: { outlinePosition: 'right' } }
+    const defaultOptions: any = {}
+    applyOutlinePosition(msg, defaultOptions)
+    expect(defaultOptions.outline.position).toBe('right')
+  })
+
+  it("sets defaultOptions.outline.position to 'left' when option is 'left'", () => {
+    const msg = { options: { outlinePosition: 'left' } }
+    const defaultOptions: any = {}
+    applyOutlinePosition(msg, defaultOptions)
+    expect(defaultOptions.outline.position).toBe('left')
+  })
+
+  it('does not set outline when outlinePosition is absent', () => {
+    const msg = { options: {} }
+    const defaultOptions: any = {}
+    applyOutlinePosition(msg, defaultOptions)
+    expect(defaultOptions.outline).toBeUndefined()
+  })
+
+  it('preserves existing outline keys (e.g. enable) and only overrides position', () => {
+    const msg = { options: { outlinePosition: 'left' } }
+    const defaultOptions: any = { outline: { enable: true } }
+    applyOutlinePosition(msg, defaultOptions)
+    expect(defaultOptions.outline.enable).toBe(true)
+    expect(defaultOptions.outline.position).toBe('left')
+  })
+
+  it('does not touch outline when msg.options is undefined', () => {
+    const msg: any = {}
+    const defaultOptions: any = { outline: { enable: true } }
+    applyOutlinePosition(msg, defaultOptions)
+    expect(defaultOptions.outline).toEqual({ enable: true })
+  })
+})
+
+describe('highlightHeadings handling', () => {
+  // Replicate the highlightHeadings body-attribute logic from main.ts
+  function applyHighlightHeadings(msg: any) {
+    document.body.setAttribute(
+      'data-highlight-headings',
+      msg.options && msg.options.highlightHeadings ? '1' : '0'
+    )
+  }
+
+  beforeEach(() => {
+    document.body.removeAttribute('data-highlight-headings')
+  })
+
+  it("sets data-highlight-headings to '1' when option is true", () => {
+    applyHighlightHeadings({ options: { highlightHeadings: true } })
+    expect(document.body.getAttribute('data-highlight-headings')).toBe('1')
+  })
+
+  it("sets data-highlight-headings to '0' when option is false", () => {
+    applyHighlightHeadings({ options: { highlightHeadings: false } })
+    expect(document.body.getAttribute('data-highlight-headings')).toBe('0')
+  })
+
+  it("sets data-highlight-headings to '0' when key is absent from options", () => {
+    applyHighlightHeadings({ options: {} })
+    expect(document.body.getAttribute('data-highlight-headings')).toBe('0')
+  })
+
+  it("sets data-highlight-headings to '0' when msg.options is undefined and does not throw", () => {
+    expect(() => applyHighlightHeadings({})).not.toThrow()
+    expect(document.body.getAttribute('data-highlight-headings')).toBe('0')
+  })
+})
+
 describe('initVditor option merging', () => {
   it('dark theme overrides stored options', () => {
     // Simple deep merge matching lodash.merge behavior

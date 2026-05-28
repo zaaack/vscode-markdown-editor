@@ -38,6 +38,8 @@ const mockConfig: Record<string, any> = {
   imageSaveFolder: 'assets',
   useVscodeThemeColor: true,
   customCss: '',
+  outlinePosition: 'right',
+  highlightHeadings: false,
 }
 
 export const workspace = {

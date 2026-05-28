@@ -188,6 +188,96 @@ describe('message protocol', () => {
   })
 })
 
+describe('new settings forwarded to webview', () => {
+  let panel: ReturnType<typeof mockWebviewPanel>
+  let context: ReturnType<typeof mockExtensionContext>
+
+  beforeEach(() => {
+    panel = mockWebviewPanel({ active: true })
+    context = mockExtensionContext()
+    // Reset to package.json-style defaults between tests
+    setMockConfig('outlinePosition', 'right')
+    setMockConfig('highlightHeadings', false)
+  })
+
+  // Replicates the ready -> update handler used by both EditorPanel and
+  // MarkdownEditorProvider in src/extension.ts.
+  async function simulateReady() {
+    const config = workspace.getConfiguration('markdown-editor')
+    panel.webview.postMessage({
+      command: 'update',
+      content: '# Test',
+      type: 'init',
+      options: {
+        useVscodeThemeColor: config.get('useVscodeThemeColor'),
+        highlightHeadings: config.get('highlightHeadings'),
+        outlinePosition: config.get('outlinePosition'),
+        ...context.globalState.get('vditor.options'),
+      },
+      theme: window.activeColorTheme.kind === ColorThemeKind.Dark ? 'dark' : 'light',
+    })
+  }
+
+  it('forwards outlinePosition and highlightHeadings on ready (defaults from mock)', async () => {
+    await simulateReady()
+    expect(panel.webview.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        command: 'update',
+        type: 'init',
+        options: expect.objectContaining({
+          outlinePosition: 'right',
+          highlightHeadings: false,
+        }),
+      })
+    )
+  })
+
+  it("forwards outlinePosition === 'left' when configured", async () => {
+    setMockConfig('outlinePosition', 'left')
+    await simulateReady()
+    expect(panel.webview.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ outlinePosition: 'left' }),
+      })
+    )
+  })
+
+  it('forwards highlightHeadings === true when configured', async () => {
+    setMockConfig('highlightHeadings', true)
+    await simulateReady()
+    expect(panel.webview.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        options: expect.objectContaining({ highlightHeadings: true }),
+      })
+    )
+  })
+
+  it('setMockConfig accepts the two new keys without changing other config', async () => {
+    // Snapshot an unrelated key so we can verify our writes don't affect it.
+    const config = workspace.getConfiguration('markdown-editor')
+    const before = config.get('imageSaveFolder')
+    setMockConfig('outlinePosition', 'left')
+    setMockConfig('highlightHeadings', true)
+    expect(config.get('outlinePosition')).toBe('left')
+    expect(config.get('highlightHeadings')).toBe(true)
+    // unrelated key unaffected
+    expect(config.get('imageSaveFolder')).toBe(before)
+  })
+
+  it('returns the mock default for outlinePosition / highlightHeadings when unset by a test', () => {
+    // The mock seeds these keys, so .get() returns the mock default rather
+    // than undefined. (See vscode-mock.ts mockConfig.)
+    const config = workspace.getConfiguration('markdown-editor')
+    expect(config.get('outlinePosition')).toBe('right')
+    expect(config.get('highlightHeadings')).toBe(false)
+  })
+
+  it('falls back to caller-provided default for an unknown key', () => {
+    const config = workspace.getConfiguration('markdown-editor')
+    expect(config.get('totallyUnknownKey', 'fallback')).toBe('fallback')
+  })
+})
+
 describe('circular update prevention', () => {
   it('does not forward changes when panel is active', () => {
     const panel = mockWebviewPanel({ active: true })
