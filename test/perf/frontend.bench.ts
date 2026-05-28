@@ -1,12 +1,24 @@
 import { bench, describe } from 'vitest'
 
-import * as path from 'path'
-const lodashPath = path.resolve(__dirname, '../../media-src/node_modules/lodash')
-const { merge } = require(lodashPath)
+// Replicates the deepMerge currently shipping in media-src/src/main.ts.
+// We benchmark this against simpler alternatives in case it ever becomes
+// the hot path. Historically this bench compared lodash.merge, but main.ts
+// no longer depends on lodash — it uses this hand-rolled function instead.
+function deepMerge(target: any, ...sources: any[]): any {
+  for (const source of sources) {
+    if (!source) continue
+    for (const key of Object.keys(source)) {
+      if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+        target[key] = deepMerge(target[key] || {}, source[key])
+      } else {
+        target[key] = source[key]
+      }
+    }
+  }
+  return target
+}
 
-// Benchmark lodash.merge overhead - this is a candidate for removal
-// lodash contributes significantly to the 805KB bundle
-describe('lodash.merge vs alternatives', () => {
+describe('option merging (deepMerge vs alternatives)', () => {
   const storedOptions = {
     theme: 'dark',
     mode: 'ir',
@@ -20,9 +32,9 @@ describe('lodash.merge vs alternatives', () => {
     preview: { math: { inlineDigit: true } },
   }
 
-  bench('lodash.merge (current)', () => {
+  bench('deepMerge (current)', () => {
     let defaultOptions: any = {}
-    defaultOptions = merge(defaultOptions, storedOptions, mathOverride)
+    defaultOptions = deepMerge(defaultOptions, storedOptions, mathOverride)
     defaultOptions.theme = 'dark'
     defaultOptions.preview.theme = { current: 'dark' }
   })
