@@ -19,6 +19,11 @@
 9. Multiple graph support including KaTeX / Mermaid / Graphviz / ECharts / abc.js (notation) / ...
 10. For more usage please see [vditor](https://github.com/Vanessa219/vditor)
 
+## Settings
+
+- `markdown-editor.highlightHeadings` (boolean, default: `false`): when enabled, all headings (h1–h6) render with a themed background and foreground color to make sections easier to scan in long documents. This uses VS Code theme variables so it adapts to light/dark/high-contrast themes.
+
+
 ## Local Development / Installation
 
 To install and run the extension locally:
