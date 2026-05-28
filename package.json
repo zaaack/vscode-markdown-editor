@@ -24,7 +24,6 @@
   "activationEvents": [
     "onCommand:markdown-editor.openEditor",
     "onWebviewPanel:markdown-editor",
-    "onLanguage:markdown",
     "onCustomEditor:markdown-editor.customEditor"
   ],
   "repository": {
@@ -97,7 +96,8 @@
         },
         "markdown-editor.customCss": {
           "type": "string",
-          "default": ""
+          "default": "",
+          "description": "Custom CSS injected into the editor webview. Useful for personalizing fonts, line height, or padding inside the rendered markdown."
         }
       }
     },
