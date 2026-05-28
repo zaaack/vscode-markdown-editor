@@ -10,7 +10,12 @@ import {
   saveVditorOptions,
 } from './utils'
 
-import Vditor from 'vditor'
+// Import Vditor from its TS source rather than the pre-bundled UMD
+// at vditor/dist/index.min.js. This lets esbuild see the full module
+// graph and drop unused toolbar button modules via the stub plugin
+// in build.mjs. CSS is still consumed from the dist/ output because
+// upstream ships only the minified stylesheet.
+import Vditor from 'vditor/src/index'
 import 'vditor/dist/index.css'
 import { t, lang } from './lang'
 import { toolbar } from './toolbar'
