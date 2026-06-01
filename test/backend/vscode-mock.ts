@@ -40,6 +40,9 @@ const mockConfig: Record<string, any> = {
   customCss: '',
   outlinePosition: 'right',
   highlightHeadings: false,
+  headingHighlightBackground: '',
+  headingHighlightForeground: '',
+  headingHighlightPerLevel: false,
 }
 
 export const workspace = {

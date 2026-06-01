@@ -88,6 +88,21 @@
           "default": false,
           "description": "Apply a themed background and foreground color to headings (h1–h6) for easier scanning of long documents."
         },
+        "markdown-editor.headingHighlightBackground": {
+          "type": "string",
+          "default": "",
+          "description": "Override the background color used by `highlightHeadings`. Accepts any CSS color value (e.g. `#ffe0b2`, `rgba(255, 200, 0, 0.15)`). Leave empty to use VS Code's `--vscode-editor-selectionHighlightBackground` theme variable."
+        },
+        "markdown-editor.headingHighlightForeground": {
+          "type": "string",
+          "default": "",
+          "description": "Override the foreground (text) color used by `highlightHeadings`. Accepts any CSS color value. Leave empty to use VS Code's `--vscode-editor-foreground` theme variable."
+        },
+        "markdown-editor.headingHighlightPerLevel": {
+          "type": "boolean",
+          "default": false,
+          "description": "When `highlightHeadings` is on, also apply progressively lighter tints to deeper heading levels (H1 strongest, H6 lightest). Helps the document hierarchy stand out at a glance."
+        },
         "markdown-editor.outlinePosition": {
           "type": "string",
           "enum": ["left", "right"],

@@ -172,6 +172,15 @@ export class EditorPanel {
           highlightHeadings: EditorPanel.config.get<boolean>(
             'highlightHeadings'
           ),
+          headingHighlightBackground: EditorPanel.config.get<string>(
+            'headingHighlightBackground'
+          ),
+          headingHighlightForeground: EditorPanel.config.get<string>(
+            'headingHighlightForeground'
+          ),
+          headingHighlightPerLevel: EditorPanel.config.get<boolean>(
+            'headingHighlightPerLevel'
+          ),
           outlinePosition: EditorPanel.config.get<'left' | 'right'>(
             'outlinePosition'
           ),
@@ -228,6 +237,15 @@ export class EditorPanel {
                 ),
                 highlightHeadings: EditorPanel.config.get<boolean>(
                   'highlightHeadings'
+                ),
+                headingHighlightBackground: EditorPanel.config.get<string>(
+                  'headingHighlightBackground'
+                ),
+                headingHighlightForeground: EditorPanel.config.get<string>(
+                  'headingHighlightForeground'
+                ),
+                headingHighlightPerLevel: EditorPanel.config.get<boolean>(
+                  'headingHighlightPerLevel'
                 ),
                 outlinePosition: EditorPanel.config.get<'left' | 'right'>(
                   'outlinePosition'
@@ -526,6 +544,9 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
             options: {
               useVscodeThemeColor: EditorPanel.config.get<boolean>('useVscodeThemeColor'),
               highlightHeadings: EditorPanel.config.get<boolean>('highlightHeadings'),
+              headingHighlightBackground: EditorPanel.config.get<string>('headingHighlightBackground'),
+              headingHighlightForeground: EditorPanel.config.get<string>('headingHighlightForeground'),
+              headingHighlightPerLevel: EditorPanel.config.get<boolean>('headingHighlightPerLevel'),
               outlinePosition: EditorPanel.config.get<'left' | 'right'>('outlinePosition'),
               ...this.context.globalState.get(KeyVditorOptions),
             },

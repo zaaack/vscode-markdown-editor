@@ -205,6 +205,80 @@ describe('highlightHeadings handling', () => {
   })
 })
 
+describe('heading highlight color & per-level customization', () => {
+  // Replicate the customization branch of the init handler.
+  function applyHeadingColors(msg: any) {
+    document.body.setAttribute(
+      'data-highlight-headings-per-level',
+      msg.options && msg.options.headingHighlightPerLevel ? '1' : '0'
+    )
+    const bg = msg.options && msg.options.headingHighlightBackground
+    const fg = msg.options && msg.options.headingHighlightForeground
+    if (bg) {
+      document.body.style.setProperty('--bme-heading-bg', bg)
+    } else {
+      document.body.style.removeProperty('--bme-heading-bg')
+    }
+    if (fg) {
+      document.body.style.setProperty('--bme-heading-fg', fg)
+    } else {
+      document.body.style.removeProperty('--bme-heading-fg')
+    }
+  }
+
+  beforeEach(() => {
+    document.body.removeAttribute('data-highlight-headings-per-level')
+    document.body.style.removeProperty('--bme-heading-bg')
+    document.body.style.removeProperty('--bme-heading-fg')
+  })
+
+  it("sets --bme-heading-bg when headingHighlightBackground is a color", () => {
+    applyHeadingColors({
+      options: { headingHighlightBackground: 'rgba(255, 200, 0, 0.15)' },
+    })
+    expect(document.body.style.getPropertyValue('--bme-heading-bg')).toBe(
+      'rgba(255, 200, 0, 0.15)'
+    )
+  })
+
+  it("sets --bme-heading-fg when headingHighlightForeground is a color", () => {
+    applyHeadingColors({
+      options: { headingHighlightForeground: '#222' },
+    })
+    expect(document.body.style.getPropertyValue('--bme-heading-fg')).toBe('#222')
+  })
+
+  it('clears the custom property when the setting is an empty string', () => {
+    // Pre-seed the property as if from a previous init.
+    document.body.style.setProperty('--bme-heading-bg', 'red')
+    applyHeadingColors({ options: { headingHighlightBackground: '' } })
+    expect(document.body.style.getPropertyValue('--bme-heading-bg')).toBe('')
+  })
+
+  it("sets data-highlight-headings-per-level to '1' when option is true", () => {
+    applyHeadingColors({ options: { headingHighlightPerLevel: true } })
+    expect(
+      document.body.getAttribute('data-highlight-headings-per-level')
+    ).toBe('1')
+  })
+
+  it("sets data-highlight-headings-per-level to '0' when option is missing", () => {
+    applyHeadingColors({ options: {} })
+    expect(
+      document.body.getAttribute('data-highlight-headings-per-level')
+    ).toBe('0')
+  })
+
+  it('does not throw when msg.options is undefined', () => {
+    expect(() => applyHeadingColors({})).not.toThrow()
+    expect(
+      document.body.getAttribute('data-highlight-headings-per-level')
+    ).toBe('0')
+    expect(document.body.style.getPropertyValue('--bme-heading-bg')).toBe('')
+    expect(document.body.style.getPropertyValue('--bme-heading-fg')).toBe('')
+  })
+})
+
 describe('initVditor option merging', () => {
   it('dark theme overrides stored options', () => {
     // Simple deep merge matching lodash.merge behavior

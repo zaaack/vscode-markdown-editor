@@ -15,11 +15,40 @@ body[data-use-vscode-theme-color="1"] .vditor {
   --toolbar-background-color: var(--vscode-editor-background);
   --textarea-background-color: var(--vscode-editor-background);
 }
+/*
+ * Heading highlight. The colors flow through CSS custom properties so the
+ * `markdown-editor.headingHighlightBackground` / `headingHighlightForeground`
+ * settings can override them at runtime (set on document.body in main.ts).
+ * Falls back to VS Code theme variables so themes adapt automatically.
+ */
 body[data-highlight-headings="1"] .vditor-reset :is(h1, h2, h3, h4, h5, h6) {
-  background-color: var(--vscode-editor-selectionHighlightBackground);
-  color: var(--vscode-editor-foreground);
+  background-color: var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground));
+  color: var(--bme-heading-fg, var(--vscode-editor-foreground));
   padding: 4px 8px;
   border-radius: 3px;
+}
+
+/*
+ * Per-level tinting. When `headingHighlightPerLevel` is on, H1 keeps the
+ * full strength of the background color; each deeper level fades the band
+ * via `color-mix` so the document hierarchy reads at a glance.
+ * `color-mix` is widely supported in modern Chromium (VS Code's webview
+ * runs on Electron Chromium — no compatibility risk).
+ */
+body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor-reset h2 {
+  background-color: color-mix(in srgb, var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground)) 80%, transparent);
+}
+body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor-reset h3 {
+  background-color: color-mix(in srgb, var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground)) 60%, transparent);
+}
+body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor-reset h4 {
+  background-color: color-mix(in srgb, var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground)) 45%, transparent);
+}
+body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor-reset h5 {
+  background-color: color-mix(in srgb, var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground)) 30%, transparent);
+}
+body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor-reset h6 {
+  background-color: color-mix(in srgb, var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground)) 20%, transparent);
 }
 /* fix font family */
 .vditor .vditor-reset {

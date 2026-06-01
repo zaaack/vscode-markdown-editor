@@ -136,6 +136,26 @@ window.addEventListener('message', (e) => {
           'data-highlight-headings',
           msg.options && msg.options.highlightHeadings ? '1' : '0'
         )
+        document.body.setAttribute(
+          'data-highlight-headings-per-level',
+          msg.options && msg.options.headingHighlightPerLevel ? '1' : '0'
+        )
+        // Custom heading colors override the default --vscode-* fallbacks.
+        // We set them as CSS custom properties on the body so the rules in
+        // main.css can fall back via `var(--bme-heading-bg, var(--vscode-…))`.
+        // Empty-string settings clear the property so the fallback wins.
+        const bg = msg.options && msg.options.headingHighlightBackground
+        const fg = msg.options && msg.options.headingHighlightForeground
+        if (bg) {
+          document.body.style.setProperty('--bme-heading-bg', bg)
+        } else {
+          document.body.style.removeProperty('--bme-heading-bg')
+        }
+        if (fg) {
+          document.body.style.setProperty('--bme-heading-fg', fg)
+        } else {
+          document.body.style.removeProperty('--bme-heading-fg')
+        }
         try {
           initVditor(msg)
         } catch (error) {

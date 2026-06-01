@@ -36,9 +36,12 @@ describe('package.json: activationEvents', () => {
 describe('package.json: contributed settings', () => {
   const props = manifest.contributes.configuration.properties
 
-  it('declares all five user-facing settings', () => {
+  it('declares all eight user-facing settings', () => {
     expect(Object.keys(props).sort()).toEqual([
       'markdown-editor.customCss',
+      'markdown-editor.headingHighlightBackground',
+      'markdown-editor.headingHighlightForeground',
+      'markdown-editor.headingHighlightPerLevel',
       'markdown-editor.highlightHeadings',
       'markdown-editor.imageSaveFolder',
       'markdown-editor.outlinePosition',
@@ -55,6 +58,20 @@ describe('package.json: contributed settings', () => {
 
   it('highlightHeadings defaults to false', () => {
     expect(props['markdown-editor.highlightHeadings'].default).toBe(false)
+  })
+
+  it('heading highlight color overrides default to empty string', () => {
+    // Empty string is the sentinel for "use the VS Code theme variable
+    // fallback" — the CSS rule is `var(--bme-heading-bg, var(--vscode-…))`.
+    expect(props['markdown-editor.headingHighlightBackground'].default).toBe('')
+    expect(props['markdown-editor.headingHighlightForeground'].default).toBe('')
+    expect(props['markdown-editor.headingHighlightBackground'].type).toBe('string')
+    expect(props['markdown-editor.headingHighlightForeground'].type).toBe('string')
+  })
+
+  it('headingHighlightPerLevel defaults to false', () => {
+    expect(props['markdown-editor.headingHighlightPerLevel'].default).toBe(false)
+    expect(props['markdown-editor.headingHighlightPerLevel'].type).toBe('boolean')
   })
 
   it('every setting has a description', () => {
