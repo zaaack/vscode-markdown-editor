@@ -37,18 +37,29 @@ const stubPath = path.resolve(
   'src/stubs/vditor-toolbar-stubs.ts'
 )
 
-// Match the four button source files inside Vditor's TS sources. The
-// regex tolerates both extension-less imports (Vditor uses `from "./Br"`
-// etc.) and the resolved `.ts` path esbuild produces during traversal.
-const unusedVditorToolbarButtons =
-  /[\\/]vditor[\\/]src[\\/]ts[\\/]toolbar[\\/](Br|Fullscreen|Record|Export)(\.ts)?$/
+// Match the four button imports inside Vditor's toolbar/index.ts. esbuild's
+// `onResolve.filter` runs against the raw import string (e.g. `"./Br"`), not
+// the resolved file path, so a path-shaped regex like
+// `/vditor/src/ts/toolbar/Br/` never matches — the unused button source kept
+// landing in the bundle. We match the import string and then gate on the
+// importer being Vditor's toolbar/index.ts so we don't accidentally intercept
+// some other library that happens to import a "./Br".
+const unusedVditorToolbarImport = /^\.\/(Br|Fullscreen|Record|Export)$/
 
 const stubUnusedVditorButtons = {
   name: 'stub-unused-vditor-buttons',
   setup(build) {
-    build.onResolve({ filter: unusedVditorToolbarButtons }, () => ({
-      path: stubPath,
-    }))
+    build.onResolve({ filter: unusedVditorToolbarImport }, (args) => {
+      // Vditor's pnpm install path looks like
+      //   .../node_modules/.pnpm/vditor@…/node_modules/vditor/src/ts/toolbar/index.ts
+      // Match on the trailing structural suffix so the test passes regardless
+      // of pnpm hash / install layout.
+      const importer = args.importer.replace(/\\/g, '/')
+      if (/\/vditor\/src\/ts\/toolbar\/index\.ts$/.test(importer)) {
+        return { path: stubPath }
+      }
+      return null
+    })
   },
 }
 
