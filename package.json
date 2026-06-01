@@ -3,7 +3,7 @@
   "displayName": "Better Markdown Editor",
   "icon": "media/logo.png",
   "description": "A full-featured WYSIWYG markdown editor for VS Code.",
-  "version": "0.1.14",
+  "version": "0.2.0",
   "publisher": "masterofarbs-audiodub",
   "private": true,
   "engines": {
@@ -28,7 +28,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/zaaack/vscode-markdown-editor.git"
+    "url": "https://github.com/masterofarbs-audiodub/better-markdown-editor.git"
   },
   "main": "out/extension.js",
   "contributes": {
