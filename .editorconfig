@@ -1,0 +1,27 @@
+# EditorConfig — https://editorconfig.org
+# Most editors auto-apply these. Matches the prevailing style in the
+# codebase (2-space indent, LF line endings, UTF-8, trim trailing
+# whitespace, final newline). Adopted in 0.2.0; pre-existing files
+# (notably media-src/src/toolbar.ts which uses tabs) will normalize
+# the next time they're touched and saved through a conforming editor.
+
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown trailing whitespace is sometimes a hard line break — leave alone.
+[*.md]
+trim_trailing_whitespace = false
+
+# Generated bundles + maps — don't reformat.
+[media/dist/**]
+indent_style = unset
+indent_size = unset
+trim_trailing_whitespace = false
+insert_final_newline = false

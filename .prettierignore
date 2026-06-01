@@ -1,0 +1,19 @@
+# Generated / vendored — never reformat.
+node_modules
+out
+media/dist
+*.vsix
+
+# Sourcemaps and minified upstream assets.
+*.min.js
+*.min.css
+*.map
+
+# Lockfiles — managed by their respective package managers.
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Local notes that we explicitly don't track in git either.
+TODO.md
+README-DRAFT.md
