@@ -279,6 +279,89 @@ describe('heading highlight color & per-level customization', () => {
   })
 })
 
+describe('highlightTableHeaders handling', () => {
+  function applyTableHeaders(msg: any) {
+    document.body.setAttribute(
+      'data-highlight-table-headers',
+      msg.options && msg.options.highlightTableHeaders ? '1' : '0'
+    )
+  }
+
+  beforeEach(() => {
+    document.body.removeAttribute('data-highlight-table-headers')
+  })
+
+  it("sets data-highlight-table-headers to '1' when option is true", () => {
+    applyTableHeaders({ options: { highlightTableHeaders: true } })
+    expect(document.body.getAttribute('data-highlight-table-headers')).toBe('1')
+  })
+
+  it("sets data-highlight-table-headers to '0' when option is missing", () => {
+    applyTableHeaders({ options: {} })
+    expect(document.body.getAttribute('data-highlight-table-headers')).toBe('0')
+  })
+
+  it("sets data-highlight-table-headers to '0' when msg.options is undefined", () => {
+    expect(() => applyTableHeaders({})).not.toThrow()
+    expect(document.body.getAttribute('data-highlight-table-headers')).toBe('0')
+  })
+})
+
+describe('outlineMaxDepth handling', () => {
+  // Replicate the clamp + body-attribute logic from main.ts.
+  function applyOutlineMaxDepth(msg: any) {
+    const rawDepth =
+      msg.options && typeof msg.options.outlineMaxDepth === 'number'
+        ? msg.options.outlineMaxDepth
+        : 6
+    const depth = Math.min(6, Math.max(1, Math.floor(rawDepth)))
+    document.body.setAttribute('data-outline-max-depth', String(depth))
+  }
+
+  beforeEach(() => {
+    document.body.removeAttribute('data-outline-max-depth')
+  })
+
+  it('writes the literal value for in-range integers', () => {
+    for (const depth of [1, 2, 3, 4, 5, 6]) {
+      applyOutlineMaxDepth({ options: { outlineMaxDepth: depth } })
+      expect(document.body.getAttribute('data-outline-max-depth')).toBe(
+        String(depth)
+      )
+    }
+  })
+
+  it('clamps below-range values up to 1', () => {
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: 0 } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('1')
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: -3 } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('1')
+  })
+
+  it('clamps above-range values down to 6', () => {
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: 7 } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('6')
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: 999 } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('6')
+  })
+
+  it('floors non-integer numeric values', () => {
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: 2.9 } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('2')
+  })
+
+  it('defaults to 6 when option is missing or wrong type', () => {
+    applyOutlineMaxDepth({ options: {} })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('6')
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: 'three' } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('6')
+    applyOutlineMaxDepth({ options: { outlineMaxDepth: null } })
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('6')
+    applyOutlineMaxDepth({})
+    expect(document.body.getAttribute('data-outline-max-depth')).toBe('6')
+  })
+})
+
 describe('initVditor option merging', () => {
   it('dark theme overrides stored options', () => {
     // Simple deep merge matching lodash.merge behavior

@@ -156,6 +156,18 @@ window.addEventListener('message', (e) => {
         } else {
           document.body.style.removeProperty('--bme-heading-fg')
         }
+        document.body.setAttribute(
+          'data-highlight-table-headers',
+          msg.options && msg.options.highlightTableHeaders ? '1' : '0'
+        )
+        // Clamp to 1-6 so a stray config value can't generate invalid CSS
+        // selectors. Fall back to 6 (show everything) for missing values.
+        const rawDepth =
+          msg.options && typeof msg.options.outlineMaxDepth === 'number'
+            ? msg.options.outlineMaxDepth
+            : 6
+        const depth = Math.min(6, Math.max(1, Math.floor(rawDepth)))
+        document.body.setAttribute('data-outline-max-depth', String(depth))
         try {
           initVditor(msg)
         } catch (error) {

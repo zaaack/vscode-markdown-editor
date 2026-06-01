@@ -103,6 +103,18 @@
           "default": false,
           "description": "When `highlightHeadings` is on, also apply progressively lighter tints to deeper heading levels (H1 strongest, H6 lightest). Helps the document hierarchy stand out at a glance."
         },
+        "markdown-editor.highlightTableHeaders": {
+          "type": "boolean",
+          "default": false,
+          "description": "Apply the same themed background and foreground color used by `highlightHeadings` to `<th>` cells in tables, so table headers visually align with the document headings."
+        },
+        "markdown-editor.outlineMaxDepth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 6,
+          "default": 6,
+          "description": "Maximum heading level shown in the outline panel. `1` shows H1 only, `2` shows H1–H2, …, `6` shows everything (default). Useful for huge documents with deep nesting."
+        },
         "markdown-editor.outlinePosition": {
           "type": "string",
           "enum": ["left", "right"],

@@ -36,14 +36,16 @@ describe('package.json: activationEvents', () => {
 describe('package.json: contributed settings', () => {
   const props = manifest.contributes.configuration.properties
 
-  it('declares all eight user-facing settings', () => {
+  it('declares all ten user-facing settings', () => {
     expect(Object.keys(props).sort()).toEqual([
       'markdown-editor.customCss',
       'markdown-editor.headingHighlightBackground',
       'markdown-editor.headingHighlightForeground',
       'markdown-editor.headingHighlightPerLevel',
       'markdown-editor.highlightHeadings',
+      'markdown-editor.highlightTableHeaders',
       'markdown-editor.imageSaveFolder',
+      'markdown-editor.outlineMaxDepth',
       'markdown-editor.outlinePosition',
       'markdown-editor.useVscodeThemeColor',
     ])
@@ -72,6 +74,19 @@ describe('package.json: contributed settings', () => {
   it('headingHighlightPerLevel defaults to false', () => {
     expect(props['markdown-editor.headingHighlightPerLevel'].default).toBe(false)
     expect(props['markdown-editor.headingHighlightPerLevel'].type).toBe('boolean')
+  })
+
+  it('highlightTableHeaders defaults to false', () => {
+    expect(props['markdown-editor.highlightTableHeaders'].default).toBe(false)
+    expect(props['markdown-editor.highlightTableHeaders'].type).toBe('boolean')
+  })
+
+  it('outlineMaxDepth is a 1..6 integer with default 6', () => {
+    const o = props['markdown-editor.outlineMaxDepth']
+    expect(o.type).toBe('integer')
+    expect(o.minimum).toBe(1)
+    expect(o.maximum).toBe(6)
+    expect(o.default).toBe(6)
   })
 
   it('every setting has a description', () => {

@@ -50,6 +50,32 @@ body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor
 body[data-highlight-headings="1"][data-highlight-headings-per-level="1"] .vditor-reset h6 {
   background-color: color-mix(in srgb, var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground)) 20%, transparent);
 }
+
+/*
+ * Table header highlight. Reuses the same color tokens as the heading
+ * highlight so tables visually align with the document hierarchy.
+ * Scoped to thead > tr > th to avoid bleeding into body cells.
+ */
+body[data-highlight-table-headers="1"] .vditor-reset table thead tr th {
+  background-color: var(--bme-heading-bg, var(--vscode-editor-selectionHighlightBackground));
+  color: var(--bme-heading-fg, var(--vscode-editor-foreground));
+}
+
+/*
+ * Outline max-depth filter. Vditor's outline renders headings as a nested
+ * <ul> tree — H1 is the outermost <ul>, each deeper level is one more <ul>
+ * deep. To show only H1+H2, hide the third <ul> level and below.
+ *
+ * The body attribute is set to the highest visible level (1–6, default 6).
+ * Each rule below kicks in at the corresponding depth ceiling and hides
+ * the first <ul> below that ceiling.
+ */
+body[data-outline-max-depth="1"] .vditor-outline ul ul { display: none; }
+body[data-outline-max-depth="2"] .vditor-outline ul ul ul { display: none; }
+body[data-outline-max-depth="3"] .vditor-outline ul ul ul ul { display: none; }
+body[data-outline-max-depth="4"] .vditor-outline ul ul ul ul ul { display: none; }
+body[data-outline-max-depth="5"] .vditor-outline ul ul ul ul ul ul { display: none; }
+/* depth="6" intentionally has no rule — show all levels. */
 /* fix font family */
 .vditor .vditor-reset {
   font-family: var(--vscode-editor-font-family)!important;

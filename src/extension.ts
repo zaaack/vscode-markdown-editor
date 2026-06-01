@@ -181,6 +181,10 @@ export class EditorPanel {
           headingHighlightPerLevel: EditorPanel.config.get<boolean>(
             'headingHighlightPerLevel'
           ),
+          highlightTableHeaders: EditorPanel.config.get<boolean>(
+            'highlightTableHeaders'
+          ),
+          outlineMaxDepth: EditorPanel.config.get<number>('outlineMaxDepth'),
           outlinePosition: EditorPanel.config.get<'left' | 'right'>(
             'outlinePosition'
           ),
@@ -246,6 +250,12 @@ export class EditorPanel {
                 ),
                 headingHighlightPerLevel: EditorPanel.config.get<boolean>(
                   'headingHighlightPerLevel'
+                ),
+                highlightTableHeaders: EditorPanel.config.get<boolean>(
+                  'highlightTableHeaders'
+                ),
+                outlineMaxDepth: EditorPanel.config.get<number>(
+                  'outlineMaxDepth'
                 ),
                 outlinePosition: EditorPanel.config.get<'left' | 'right'>(
                   'outlinePosition'
@@ -547,6 +557,8 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
               headingHighlightBackground: EditorPanel.config.get<string>('headingHighlightBackground'),
               headingHighlightForeground: EditorPanel.config.get<string>('headingHighlightForeground'),
               headingHighlightPerLevel: EditorPanel.config.get<boolean>('headingHighlightPerLevel'),
+              highlightTableHeaders: EditorPanel.config.get<boolean>('highlightTableHeaders'),
+              outlineMaxDepth: EditorPanel.config.get<number>('outlineMaxDepth'),
               outlinePosition: EditorPanel.config.get<'left' | 'right'>('outlinePosition'),
               ...this.context.globalState.get(KeyVditorOptions),
             },
