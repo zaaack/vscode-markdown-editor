@@ -10,5 +10,6 @@ export default defineConfig({
   test: {
     root: path.resolve(__dirname, '..'),
     include: ['test/**/*.test.ts'],
+    setupFiles: [path.resolve(__dirname, 'setup.ts')],
   },
 })

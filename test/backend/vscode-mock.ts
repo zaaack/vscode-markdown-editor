@@ -34,15 +34,28 @@ export const WorkspaceEdit = MockWorkspaceEdit
 export enum ViewColumn { One = 1, Two = 2, Three = 3 }
 export enum ColorThemeKind { Light = 1, Dark = 2, HighContrast = 3 }
 
-const mockConfig: Record<string, any> = {
+// Defaults snapshot — captured once so resetMockConfig() can restore an
+// untouched copy between tests. Without this, a `setMockConfig` call in
+// one test silently leaks state into the next.
+const mockConfigDefaults = {
   imageSaveFolder: 'assets',
   useVscodeThemeColor: true,
   customCss: '',
   outlinePosition: 'right',
+  outlineMaxDepth: 6,
   highlightHeadings: false,
   headingHighlightBackground: '',
   headingHighlightForeground: '',
   headingHighlightPerLevel: false,
+  highlightTableHeaders: false,
+} as const
+
+const mockConfig: Record<string, any> = { ...mockConfigDefaults }
+
+export function resetMockConfig() {
+  // Drop any keys that tests added beyond the defaults.
+  for (const k of Object.keys(mockConfig)) delete mockConfig[k]
+  Object.assign(mockConfig, mockConfigDefaults)
 }
 
 export const workspace = {
