@@ -138,6 +138,123 @@ class EditorPanel {
     return vscode.workspace.getConfiguration('markdown-editor')
   }
 
+  static lineNumberScript = `<style>
+.vditor-ir .vditor-reset{padding-left:60px!important}
+.vditor-toolbar.vditor-toolbar--pin{padding-left:60px!important}
+#ln-gutter{position:fixed;width:32px;pointer-events:none;user-select:none;z-index:10;overflow:hidden;border-right:1px solid rgba(128,128,128,0.12)}
+#ln-gutter .ln{position:absolute;width:26px;text-align:right;font-size:11px;font-family:'Cascadia Code','Consolas',monospace;color:rgba(150,150,150,0.5);line-height:1}
+</style>
+<script>
+(function(){
+  window.__lnOrig='';
+  window.__lnEnabled=true;
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.command==='__setOrigContent'){window.__lnOrig=e.data.content||''}
+  });
+  var listening=false;
+  function addToggle(){
+    if(document.getElementById('ln-toggle'))return;
+    var tb=document.querySelector('.vditor-toolbar');
+    if(!tb)return;
+    var btn=document.createElement('button');
+    btn.id='ln-toggle';
+    btn.type='button';
+    btn.className='vditor-tooltipped vditor-tooltipped__s';
+    btn.setAttribute('aria-label','Toggle line numbers');
+    btn.style.cssText='background:none;border:none;cursor:pointer;padding:4px 3px;color:inherit;font:11px monospace;opacity:0.7;margin-left:2px';
+    btn.textContent='#';
+    btn.onclick=function(){
+      window.__lnEnabled=!window.__lnEnabled;
+      btn.style.opacity=window.__lnEnabled?'0.7':'0.3';
+      var g=document.getElementById('ln-gutter');
+      if(g)g.style.display=window.__lnEnabled?'':'none';
+      var r=document.querySelector('.vditor-ir .vditor-reset');
+      if(r)r.style.setProperty('padding-left',window.__lnEnabled?'60px':'35px','important');
+      if(tb)tb.style.setProperty('padding-left',window.__lnEnabled?'60px':'35px','important');
+    };
+    tb.appendChild(btn);
+  }
+  function sync(){
+    addToggle();
+    if(!window.__lnEnabled)return;
+    var reset=document.querySelector('.vditor-ir .vditor-reset');
+    var ir=document.querySelector('.vditor-ir');
+    if(!reset||!ir||reset.children.length===0) return;
+    var g=document.getElementById('ln-gutter');
+    if(!g){g=document.createElement('div');g.id='ln-gutter';document.body.appendChild(g)}
+    var irRect=ir.getBoundingClientRect();
+    g.style.left=irRect.left+'px';
+    g.style.top=irRect.top+'px';
+    g.style.height=irRect.height+'px';
+    var kids=[];
+    for(var j=0;j<reset.children.length;j++){
+      var c=reset.children[j];
+      if(c.offsetHeight>0&&c.id!=='fix-table-ir-wrapper') kids.push(c);
+    }
+    var srcLines=[];
+    try{
+      var src=window.__lnOrig||'';
+      var NL=String.fromCharCode(10);
+      var L=src.split(NL);
+      var starts=[];
+      var i=0;var fence=String.fromCharCode(96,96,96);
+      if(L.length>0&&L[0].trim()==='---'){
+        starts.push(1);i=1;
+        while(i<L.length&&L[i].trim()!=='---')i++;
+        if(i<L.length)i++;
+      }
+      while(i<L.length){
+        if(L[i].trim()===''){i++;continue}
+        starts.push(i+1);
+        var tr=L[i].trim();
+        var rH=/^#{1,6} /;var rHR=/^(---|[*]{3}|___)$/;var rLI=/^[-*+] /;var rOL=/^[0-9]+[.)] /;var rIND=/^ +[^ ]/;
+        function isBlock(s){return rH.test(s)||rLI.test(s)||rOL.test(s)||s.indexOf(fence)===0||s.charAt(0)==='|'||s.charAt(0)==='>'||rHR.test(s)}
+        if(rH.test(tr)||rHR.test(tr)){i++}
+        else if(tr.indexOf(fence)===0){
+          i++;while(i<L.length&&L[i].trim().indexOf(fence)!==0)i++;
+          if(i<L.length)i++;
+        }else if(tr.charAt(0)==='|'){
+          while(i<L.length&&L[i].trim().charAt(0)==='|')i++;
+        }else if(tr.charAt(0)==='>'){
+          while(i<L.length&&L[i].trim()!==''&&L[i].trimStart().charAt(0)==='>')i++;
+        }else if(rLI.test(tr)||rOL.test(tr)){
+          while(i<L.length){
+            if(L[i].trim()===''){
+              var nx=i+1;while(nx<L.length&&L[nx].trim()==='')nx++;
+              if(nx<L.length&&(rLI.test(L[nx].trim())||rOL.test(L[nx].trim())||rIND.test(L[nx]))){i=nx}else break;
+            }else{i++}
+          }
+        }else{
+          i++;while(i<L.length&&L[i].trim()!==''){if(isBlock(L[i].trim()))break;i++}
+        }
+      }
+      for(var j=0;j<kids.length;j++) srcLines.push(j<starts.length?starts[j]:j+1);
+    }catch(e){for(var j=0;j<kids.length;j++) srcLines.push(j+1)}
+    var html='';
+    for(var j=0;j<kids.length;j++){
+      var el=kids[j];
+      var rect=el.getBoundingClientRect();
+      var t=rect.top-irRect.top;
+      if(t+rect.height<0||t>irRect.height) continue;
+      var style=window.getComputedStyle(el);
+      var fs=parseFloat(style.fontSize)||16;
+      var lh=parseFloat(style.lineHeight);
+      if(isNaN(lh)) lh=fs*1.6;
+      var numTop=t+(lh/2)-5;
+      html+='<div class="ln" style="top:'+numTop+'px">'+srcLines[j]+'</div>';
+    }
+    g.innerHTML=html;
+    if(!listening){
+      listening=true;
+      ir.addEventListener('scroll',sync);
+      document.addEventListener('scroll',sync,true);
+      new MutationObserver(function(){requestAnimationFrame(sync)}).observe(reset,{childList:true,subtree:true,characterData:true});
+    }
+  }
+  setInterval(sync,500);
+})();
+</script>`
+
   private constructor(
     private readonly _context: vscode.ExtensionContext,
     private readonly _panel: vscode.WebviewPanel,
@@ -166,6 +283,9 @@ class EditorPanel {
         options: {
           useVscodeThemeColor: EditorPanel.config.get<boolean>(
             'useVscodeThemeColor'
+          ),
+          showLineNumbers: EditorPanel.config.get<boolean>(
+            'showLineNumbers'
           ),
           ...this._context.globalState.get(KeyVditorOptions),
         },
@@ -210,12 +330,19 @@ class EditorPanel {
           }
         }
         switch (message.command) {
-          case 'ready':
+          case 'ready': {
+            const md = this._document
+              ? this._document.getText()
+              : ''
+            this._panel.webview.postMessage({ command: '__setOrigContent', content: md })
             this._update({
               type: 'init',
               options: {
                 useVscodeThemeColor: EditorPanel.config.get<boolean>(
                   'useVscodeThemeColor'
+                ),
+                showLineNumbers: EditorPanel.config.get<boolean>(
+                  'showLineNumbers'
                 ),
                 ...this._context.globalState.get(KeyVditorOptions),
               },
@@ -226,6 +353,7 @@ class EditorPanel {
                   : 'light',
             })
             break
+          }
           case 'save-options':
             this._context.globalState.update(KeyVditorOptions, message.options)
             break
@@ -406,6 +534,7 @@ class EditorPanel {
 
 
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
+				${EditorPanel.config.get<boolean>('showLineNumbers') !== false ? EditorPanel.lineNumberScript : ''}
 			</body>
 			</html>`
     )
@@ -494,10 +623,12 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
       switch (message.command) {
         case 'ready':
+          webviewPanel.webview.postMessage({ command: '__setOrigContent', content: document.getText() })
           updateWebview({
             type: 'init',
             options: {
               useVscodeThemeColor: EditorPanel.config.get<boolean>('useVscodeThemeColor'),
+              showLineNumbers: EditorPanel.config.get<boolean>('showLineNumbers'),
               ...this.context.globalState.get(KeyVditorOptions),
             },
             theme: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
@@ -613,6 +744,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
 
 				${JsFiles.map((f) => `<script src="${f}"></script>`).join('\n')}
+				${EditorPanel.config.get<boolean>('showLineNumbers') !== false ? EditorPanel.lineNumberScript : ''}
 			</body>
 			</html>`
     )
