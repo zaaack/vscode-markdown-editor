@@ -60,6 +60,7 @@ function initVditor(msg) {
       handleToolbarClick()
       fixTableIr()
       fixPanelHover()
+      vditor.focus()
     },
     input() {
       inputTimer && clearTimeout(inputTimer)
@@ -116,6 +117,10 @@ window.addEventListener('message', (e) => {
         vditor.setValue(msg.content)
         console.log('setValue')
       }
+      break
+    }
+    case 'focus': {
+      vditor.focus()
       break
     }
     case 'uploaded': {

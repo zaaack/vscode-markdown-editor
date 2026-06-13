@@ -66,6 +66,7 @@ class EditorPanel {
     // If we already have a panel, show it.
     if (EditorPanel.currentPanel) {
       EditorPanel.currentPanel._panel.reveal(column)
+      EditorPanel.currentPanel._panel.webview.postMessage({ command: 'focus' })
       return
     }
     if (!vscode.window.activeTextEditor && !uri) {
