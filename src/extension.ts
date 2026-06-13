@@ -129,6 +129,7 @@ class EditorPanel {
       localResourceRoots: [vscode.Uri.file("/"), ...this.getFolders()],
       retainContextWhenHidden: true,
       enableCommandUris: true,
+      enableFindWidget: true,
     }
   }
   private get _fsPath() {
