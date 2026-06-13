@@ -115,16 +115,6 @@
     "esbuild": "^0.28.0",
     "foy": "^0.2.5",
     "ts-node": "9.1.1",
-    "typescript": "^4.2.2",
-    
-    "@babel/runtime-corejs3": "^7.13.17",
-    "@testing-library/dom": "^7.30.4",
-    "@testing-library/user-event": "^13.1.5",
-    "date-fns": "^2.21.1",
-    "esbuild": "^0.11.14",
-    "jquery": "^3.6.0",
-    "jquery-confirm": "^3.3.4",
-    "lodash": "^4.17.21",
-    "vditor": "^3.8.4"
+    "typescript": "^4.2.2"
   }
 }
