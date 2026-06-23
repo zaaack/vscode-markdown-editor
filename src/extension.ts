@@ -140,6 +140,26 @@ class EditorPanel {
     return vscode.workspace.getConfiguration('markdown-editor')
   }
 
+  /**
+   * Builds initial Vditor options from VS Code settings and saved options.
+   */
+  static getVditorOptions(context: vscode.ExtensionContext): any {
+    return {
+      useVscodeThemeColor: EditorPanel.config.get<boolean>(
+        'useVscodeThemeColor'
+      ),
+      showLineNumbers: EditorPanel.config.get<boolean>(
+        'showLineNumbers'
+      ),
+      outline: {
+        enable: EditorPanel.config.get<boolean>(
+          'defaultOpenOutline'
+        ) === true,
+      },
+      ...context.globalState.get(KeyVditorOptions),
+    }
+  }
+
   static lineNumberScript = `<style>
 .vditor-ir .vditor-reset{padding-left:60px!important}
 .vditor-toolbar.vditor-toolbar--pin{padding-left:60px!important}
@@ -282,15 +302,7 @@ class EditorPanel {
     vscode.window.onDidChangeActiveColorTheme((theme) => {
       this._update({
         type: 'init',
-        options: {
-          useVscodeThemeColor: EditorPanel.config.get<boolean>(
-            'useVscodeThemeColor'
-          ),
-          showLineNumbers: EditorPanel.config.get<boolean>(
-            'showLineNumbers'
-          ),
-          ...this._context.globalState.get(KeyVditorOptions),
-        },
+        options: EditorPanel.getVditorOptions(this._context),
         theme: theme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
       })
     }, null, this._disposables)
@@ -339,15 +351,7 @@ class EditorPanel {
             this._panel.webview.postMessage({ command: '__setOrigContent', content: md })
             this._update({
               type: 'init',
-              options: {
-                useVscodeThemeColor: EditorPanel.config.get<boolean>(
-                  'useVscodeThemeColor'
-                ),
-                showLineNumbers: EditorPanel.config.get<boolean>(
-                  'showLineNumbers'
-                ),
-                ...this._context.globalState.get(KeyVditorOptions),
-              },
+              options: EditorPanel.getVditorOptions(this._context),
               theme:
                 vscode.window.activeColorTheme.kind ===
                   vscode.ColorThemeKind.Dark
@@ -628,11 +632,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           webviewPanel.webview.postMessage({ command: '__setOrigContent', content: document.getText() })
           updateWebview({
             type: 'init',
-            options: {
-              useVscodeThemeColor: EditorPanel.config.get<boolean>('useVscodeThemeColor'),
-              showLineNumbers: EditorPanel.config.get<boolean>('showLineNumbers'),
-              ...this.context.globalState.get(KeyVditorOptions),
-            },
+            options: EditorPanel.getVditorOptions(this.context),
             theme: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
           })
           break

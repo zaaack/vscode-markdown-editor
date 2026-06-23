@@ -89,6 +89,11 @@
           "default": true,
           "description": "Show line numbers in the left gutter of the markdown editor."
         },
+        "markdown-editor.defaultOpenOutline": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open the outline by default when opening a markdown editor."
+        },
         "markdown-editor.customCss": {
           "type": "string",
           "default": ""
