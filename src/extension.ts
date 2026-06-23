@@ -10,6 +10,45 @@ function showError(msg: string) {
   vscode.window.showErrorMessage(`[markdown-editor] ${msg}`)
 }
 
+/**
+ * Opens external URIs directly and resolves local links from the Markdown file.
+ */
+async function openMarkdownLink(markdownFileUri: vscode.Uri, href: string) {
+  if (/^https?:\/\//.test(href)) {
+    await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(href))
+    return
+  }
+
+  let localUri: vscode.Uri | undefined
+
+  if (/^[a-zA-Z]:[\\/]/.test(href)) {
+    localUri = vscode.Uri.file(href)
+  } else if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
+    await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(href))
+    return
+  } else {
+    const targetPath = NodePath.resolve(
+      NodePath.dirname(markdownFileUri.fsPath),
+      href
+    )
+    localUri = vscode.Uri.file(targetPath)
+  }
+
+  let fileStat: vscode.FileStat
+  try {
+    fileStat = await vscode.workspace.fs.stat(localUri)
+  } catch (error) {
+    return
+  }
+
+  if (fileStat.type === vscode.FileType.Directory) {
+    await vscode.commands.executeCommand('revealInExplorer', localUri)
+    return
+  }
+
+  await vscode.commands.executeCommand('vscode.open', localUri)
+}
+
 export function activate(context: vscode.ExtensionContext) {
   // Register original command (used by context menu/shortcuts)
   context.subscriptions.push(
@@ -419,11 +458,7 @@ class EditorPanel {
             break
           }
           case 'open-link': {
-            let url = message.href
-            if (!/^http/.test(url)) {
-              url = NodePath.resolve(this._fsPath, '..', url)
-            }
-            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url))
+            await openMarkdownLink(this._uri, message.href)
             break
           }
         }
@@ -686,11 +721,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           break
         }
         case 'open-link': {
-          let url = message.href
-          if (!/^http/.test(url)) {
-            url = NodePath.resolve(uri.fsPath, '..', url)
-          }
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url))
+          await openMarkdownLink(uri, message.href)
           break
         }
       }

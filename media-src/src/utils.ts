@@ -103,14 +103,22 @@ export function handleToolbarClick() {
   })
 }
 
+/**
+ * Sends raw Markdown link targets to the extension host for opening.
+ */
 export function fixLinkClick() {
   const openLink = (url: string) => {
     vscode.postMessage({ command: 'open-link', href: url })
   }
-  document.addEventListener('click', e=> {
-    let el = e.target as HTMLAnchorElement
-    if (el.tagName === 'A') {
-      openLink(el.href)
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement
+    const link = target.closest('a')
+    const href = link?.getAttribute('href')
+
+    if (href) {
+      e.preventDefault()
+      e.stopPropagation()
+      openLink(href)
     }
   })
   window.open = (url: string, ...args: any[]) => {
