@@ -1,4 +1,4 @@
 allowBuilds:
   esbuild: true
-packages: 
+packages:
   - "./media-src"
