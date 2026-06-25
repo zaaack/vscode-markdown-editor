@@ -10,6 +10,45 @@ function showError(msg: string) {
   vscode.window.showErrorMessage(`[markdown-editor] ${msg}`)
 }
 
+/**
+ * Opens external URIs directly and resolves local links from the Markdown file.
+ */
+async function openMarkdownLink(markdownFileUri: vscode.Uri, href: string) {
+  if (/^https?:\/\//.test(href)) {
+    await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(href))
+    return
+  }
+
+  let localUri: vscode.Uri | undefined
+
+  if (/^[a-zA-Z]:[\\/]/.test(href)) {
+    localUri = vscode.Uri.file(href)
+  } else if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(href)) {
+    await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(href))
+    return
+  } else {
+    const targetPath = NodePath.resolve(
+      NodePath.dirname(markdownFileUri.fsPath),
+      href
+    )
+    localUri = vscode.Uri.file(targetPath)
+  }
+
+  let fileStat: vscode.FileStat
+  try {
+    fileStat = await vscode.workspace.fs.stat(localUri)
+  } catch (error) {
+    return
+  }
+
+  if (fileStat.type === vscode.FileType.Directory) {
+    await vscode.commands.executeCommand('revealInExplorer', localUri)
+    return
+  }
+
+  await vscode.commands.executeCommand('vscode.open', localUri)
+}
+
 export function activate(context: vscode.ExtensionContext) {
   // Register original command (used by context menu/shortcuts)
   context.subscriptions.push(
@@ -138,6 +177,26 @@ class EditorPanel {
 
   static get config() {
     return vscode.workspace.getConfiguration('markdown-editor')
+  }
+
+  /**
+   * Builds initial Vditor options from VS Code settings and saved options.
+   */
+  static getVditorOptions(context: vscode.ExtensionContext): any {
+    return {
+      useVscodeThemeColor: EditorPanel.config.get<boolean>(
+        'useVscodeThemeColor'
+      ),
+      showLineNumbers: EditorPanel.config.get<boolean>(
+        'showLineNumbers'
+      ),
+      outline: {
+        enable: EditorPanel.config.get<boolean>(
+          'defaultOpenOutline'
+        ) === true,
+      },
+      ...context.globalState.get(KeyVditorOptions),
+    }
   }
 
   static lineNumberScript = `<style>
@@ -282,15 +341,7 @@ class EditorPanel {
     vscode.window.onDidChangeActiveColorTheme((theme) => {
       this._update({
         type: 'init',
-        options: {
-          useVscodeThemeColor: EditorPanel.config.get<boolean>(
-            'useVscodeThemeColor'
-          ),
-          showLineNumbers: EditorPanel.config.get<boolean>(
-            'showLineNumbers'
-          ),
-          ...this._context.globalState.get(KeyVditorOptions),
-        },
+        options: EditorPanel.getVditorOptions(this._context),
         theme: theme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
       })
     }, null, this._disposables)
@@ -339,15 +390,7 @@ class EditorPanel {
             this._panel.webview.postMessage({ command: '__setOrigContent', content: md })
             this._update({
               type: 'init',
-              options: {
-                useVscodeThemeColor: EditorPanel.config.get<boolean>(
-                  'useVscodeThemeColor'
-                ),
-                showLineNumbers: EditorPanel.config.get<boolean>(
-                  'showLineNumbers'
-                ),
-                ...this._context.globalState.get(KeyVditorOptions),
-              },
+              options: EditorPanel.getVditorOptions(this._context),
               theme:
                 vscode.window.activeColorTheme.kind ===
                   vscode.ColorThemeKind.Dark
@@ -415,11 +458,7 @@ class EditorPanel {
             break
           }
           case 'open-link': {
-            let url = message.href
-            if (!/^http/.test(url)) {
-              url = NodePath.resolve(this._fsPath, '..', url)
-            }
-            vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url))
+            await openMarkdownLink(this._uri, message.href)
             break
           }
         }
@@ -628,11 +667,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           webviewPanel.webview.postMessage({ command: '__setOrigContent', content: document.getText() })
           updateWebview({
             type: 'init',
-            options: {
-              useVscodeThemeColor: EditorPanel.config.get<boolean>('useVscodeThemeColor'),
-              showLineNumbers: EditorPanel.config.get<boolean>('showLineNumbers'),
-              ...this.context.globalState.get(KeyVditorOptions),
-            },
+            options: EditorPanel.getVditorOptions(this.context),
             theme: vscode.window.activeColorTheme.kind === vscode.ColorThemeKind.Dark ? 'dark' : 'light',
           })
           break
@@ -686,11 +721,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           break
         }
         case 'open-link': {
-          let url = message.href
-          if (!/^http/.test(url)) {
-            url = NodePath.resolve(uri.fsPath, '..', url)
-          }
-          vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(url))
+          await openMarkdownLink(uri, message.href)
           break
         }
       }
