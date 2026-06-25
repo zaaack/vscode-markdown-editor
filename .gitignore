@@ -60,3 +60,5 @@ typings/
 lib
 *.vsix
 out
+
+dist
