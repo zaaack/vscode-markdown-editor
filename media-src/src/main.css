@@ -72,3 +72,83 @@ body[data-use-vscode-theme-color="1"] .vditor {
 .jconfirm-buttons button {
   text-transform: none!important;
 }
+
+/* ── Search bar ─────────────────────────────────────────────────────────── */
+#vmd-search-bar {
+  position: fixed;
+  top: 40px; /* sit just below the pinned toolbar */
+  right: 16px;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--vscode-editorWidget-background, #252526);
+  border: 1px solid var(--vscode-editorWidget-border, #454545);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  font-size: 13px;
+  color: var(--vscode-editorWidget-foreground, #ccc);
+}
+#vmd-search-bar.vmd-search-bar--open {
+  display: flex;
+}
+
+#vmd-search-input {
+  width: 200px;
+  padding: 3px 6px;
+  border: 1px solid var(--vscode-input-border, #3c3c3c);
+  border-radius: 3px;
+  background: var(--vscode-input-background, #3c3c3c);
+  color: var(--vscode-input-foreground, #ccc);
+  font-size: 13px;
+  outline: none;
+}
+#vmd-search-input:focus {
+  border-color: var(--vscode-focusBorder, #007fd4);
+}
+
+#vmd-search-count {
+  min-width: 48px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground, #888);
+}
+#vmd-search-count.vmd-search-count--nomatch {
+  color: var(--vscode-errorForeground, #f48771);
+}
+
+#vmd-search-bar button {
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: inherit;
+  cursor: pointer;
+  padding: 2px 5px;
+  font-size: 12px;
+  line-height: 1;
+}
+#vmd-search-bar button:hover {
+  border-color: var(--vscode-button-border, #555);
+  background: var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.1));
+}
+
+#vmd-search-case-label {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+}
+#vmd-search-case-label:hover {
+  border-color: var(--vscode-button-border, #555);
+  background: var(--vscode-toolbar-hoverBackground, rgba(255,255,255,0.1));
+}
+#vmd-search-case-label input {
+  margin: 0;
+  cursor: pointer;
+}

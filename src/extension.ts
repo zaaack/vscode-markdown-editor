@@ -741,10 +741,12 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
     return data
   }
 
-  private getWebviewOptions(): vscode.WebviewOptions {
+  private getWebviewOptions(): vscode.WebviewOptions & vscode.WebviewPanelOptions {
     return {
       enableScripts: true,
       localResourceRoots: [vscode.Uri.file('/'), ...MarkdownEditorProvider.getFolders()],
+      retainContextWhenHidden: true,
+      enableFindWidget: true,
     }
   }
 
