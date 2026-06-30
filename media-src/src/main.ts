@@ -17,6 +17,7 @@ import 'vditor/dist/index.css'
 import { t, lang } from './lang'
 import { toolbar } from './toolbar'
 import { fixTableIr } from './fix-table-ir'
+import { initSearch } from './search'
 import './main.css'
 
 function initVditor(msg) {
@@ -61,6 +62,10 @@ function initVditor(msg) {
       fixTableIr()
       fixPanelHover()
       vditor.focus()
+      // Initialize search bar once (idempotent across vditor re-inits)
+      if (!(window as any).__vmdSearch) {
+        ;(window as any).__vmdSearch = initSearch()
+      }
     },
     input() {
       inputTimer && clearTimeout(inputTimer)
