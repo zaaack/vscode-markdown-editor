@@ -207,11 +207,7 @@ class EditorPanel {
 </style>
 <script>
 (function(){
-  window.__lnOrig='';
   window.__lnEnabled=true;
-  window.addEventListener('message',function(e){
-    if(e.data&&e.data.command==='__setOrigContent'){window.__lnOrig=e.data.content||''}
-  });
   var listening=false;
   function addToggle(){
     if(document.getElementById('ln-toggle'))return;
@@ -254,7 +250,10 @@ class EditorPanel {
     }
     var srcLines=[];
     try{
-      var src=window.__lnOrig||'';
+      // Always read the live editor value instead of a snapshot received once at
+      // startup: a stale snapshot drifts out of sync with the rendered blocks as
+      // soon as the document is edited, producing wrong line numbers.
+      var src=(window.vditor&&window.vditor.getValue)?(window.vditor.getValue()||''):'';
       var NL=String.fromCharCode(10);
       var L=src.split(NL);
       var starts=[];
@@ -384,10 +383,6 @@ class EditorPanel {
         }
         switch (message.command) {
           case 'ready': {
-            const md = this._document
-              ? this._document.getText()
-              : ''
-            this._panel.webview.postMessage({ command: '__setOrigContent', content: md })
             this._update({
               type: 'init',
               options: EditorPanel.getVditorOptions(this._context),
@@ -664,7 +659,6 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
       switch (message.command) {
         case 'ready':
-          webviewPanel.webview.postMessage({ command: '__setOrigContent', content: document.getText() })
           updateWebview({
             type: 'init',
             options: EditorPanel.getVditorOptions(this.context),
