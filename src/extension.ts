@@ -124,6 +124,18 @@ class EditorPanel {
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined
+    // Known limitation: switching files disposes and recreates this panel (a brand
+    // new webview), which can trigger a VS Code platform-level transition where the
+    // new webview briefly renders at the wrong zoom level before VS Code's own
+    // zoom-sync (Electron webContents.setZoomFactor, applied outside this page's
+    // control) settles - see PR #166. Confirmed this is specific to that dispose+
+    // recreate transition, not "any new webview": the *first* panel ever opened in a
+    // session does not show it, only switching to a different file does. Reusing the
+    // same panel across file switches (updating its bound document in place, the
+    // same flash-free mechanism already used for theme changes) would likely avoid
+    // it, but requires also keeping <base href> (used to resolve relative image/file
+    // links) in sync with whichever file is currently bound instead of baking it into
+    // the HTML once at panel-creation time - deliberately not done here for now.
     if (EditorPanel.currentPanel && uri !== EditorPanel.currentPanel?._uri) {
       EditorPanel.currentPanel.dispose()
     }
