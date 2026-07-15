@@ -89,6 +89,31 @@ class EditorPanel {
 
   public static readonly viewType = 'markdown-editor'
 
+  /**
+   * Remembers the last scroll position for each file, keyed by fsPath, so that
+   * switching to another file and back doesn't reset the reading position.
+   * Shared across both the EditorPanel (singleton webview, disposed/recreated per
+   * file) and MarkdownEditorProvider (one webview per document via "Open With")
+   * entry points, since neither keeps the panel instance alive across a full close.
+   */
+  static _scrollPositions = new Map<string, number>()
+
+  /**
+   * Hides #app until BOTH of these are true: (a) the external main.css has actually
+   * finished loading (its <link>'s onload sets data-vmd-css-loaded="1" - see below),
+   * and (b) main.ts confirms Vditor has fully finished building its UI and applying
+   * the saved scroll position (sets data-vmd-ready="1" - see main.ts). Both
+   * conditions are necessary: a script's execution is not guaranteed to wait for an
+   * earlier stylesheet to finish loading, so Vditor can finish building (and fire
+   * its ready signal) *before* its own real CSS sizing has actually loaded, which
+   * would flash an intermediate, oddly-scaled paint (e.g. toolbar buttons at native
+   * SVG size) - most noticeable right after a file switch recreates the webview.
+   * This rule is deliberately inlined into the HTML <head> of both webview templates
+   * rather than placed in main.css itself, since that stylesheet is exactly the
+   * thing this rule needs to not depend on to take effect.
+   */
+  static appVisibilityCss = `#app{opacity:0}body[data-vmd-ready="1"][data-vmd-css-loaded="1"] #app{opacity:1}`
+
   private _disposables: vscode.Disposable[] = []
 
   public static async createOrShow(
@@ -99,6 +124,18 @@ class EditorPanel {
     const column = vscode.window.activeTextEditor
       ? vscode.window.activeTextEditor.viewColumn
       : undefined
+    // Known limitation: switching files disposes and recreates this panel (a brand
+    // new webview), which can trigger a VS Code platform-level transition where the
+    // new webview briefly renders at the wrong zoom level before VS Code's own
+    // zoom-sync (Electron webContents.setZoomFactor, applied outside this page's
+    // control) settles - see PR #166. Confirmed this is specific to that dispose+
+    // recreate transition, not "any new webview": the *first* panel ever opened in a
+    // session does not show it, only switching to a different file does. Reusing the
+    // same panel across file switches (updating its bound document in place, the
+    // same flash-free mechanism already used for theme changes) would likely avoid
+    // it, but requires also keeping <base href> (used to resolve relative image/file
+    // links) in sync with whichever file is currently bound instead of baking it into
+    // the HTML once at panel-creation time - deliberately not done here for now.
     if (EditorPanel.currentPanel && uri !== EditorPanel.currentPanel?._uri) {
       EditorPanel.currentPanel.dispose()
     }
@@ -207,11 +244,7 @@ class EditorPanel {
 </style>
 <script>
 (function(){
-  window.__lnOrig='';
   window.__lnEnabled=true;
-  window.addEventListener('message',function(e){
-    if(e.data&&e.data.command==='__setOrigContent'){window.__lnOrig=e.data.content||''}
-  });
   var listening=false;
   function addToggle(){
     if(document.getElementById('ln-toggle'))return;
@@ -254,7 +287,10 @@ class EditorPanel {
     }
     var srcLines=[];
     try{
-      var src=window.__lnOrig||'';
+      // Always read the live editor value instead of a snapshot received once at
+      // startup: a stale snapshot drifts out of sync with the rendered blocks as
+      // soon as the document is edited, producing wrong line numbers.
+      var src=(window.vditor&&window.vditor.getValue)?(window.vditor.getValue()||''):'';
       var NL=String.fromCharCode(10);
       var L=src.split(NL);
       var starts=[];
@@ -384,10 +420,6 @@ class EditorPanel {
         }
         switch (message.command) {
           case 'ready': {
-            const md = this._document
-              ? this._document.getText()
-              : ''
-            this._panel.webview.postMessage({ command: '__setOrigContent', content: md })
             this._update({
               type: 'init',
               options: EditorPanel.getVditorOptions(this._context),
@@ -401,6 +433,9 @@ class EditorPanel {
           }
           case 'save-options':
             this._context.globalState.update(KeyVditorOptions, message.options)
+            break
+          case 'scroll':
+            EditorPanel._scrollPositions.set(this._fsPath, message.top || 0)
             break
           case 'info':
             vscode.window.showInformationMessage(message.content)
@@ -538,6 +573,9 @@ class EditorPanel {
     this._panel.webview.postMessage({
       command: 'update',
       content: md,
+      ...(props.type === 'init'
+        ? { scrollTop: EditorPanel._scrollPositions.get(this._fsPath) || 0 }
+        : {}),
       ...props,
     })
   }
@@ -562,8 +600,9 @@ class EditorPanel {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<base href="${baseHref}" />
 
+				<style>${EditorPanel.appVisibilityCss}</style>
 
-				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
+				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet" onload="document.body.setAttribute('data-vmd-css-loaded','1')" onerror="document.body.setAttribute('data-vmd-css-loaded','1')">`).join('\n')}
 
 				<title>markdown editor</title>
         <style>` +
@@ -624,6 +663,9 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
       webviewPanel.webview.postMessage({
         command: 'update',
         content: document.getText(),
+        ...(props.type === 'init'
+          ? { scrollTop: EditorPanel._scrollPositions.get(uri.fsPath) || 0 }
+          : {}),
         ...props,
       })
     }
@@ -664,7 +706,6 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
       switch (message.command) {
         case 'ready':
-          webviewPanel.webview.postMessage({ command: '__setOrigContent', content: document.getText() })
           updateWebview({
             type: 'init',
             options: EditorPanel.getVditorOptions(this.context),
@@ -673,6 +714,9 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           break
         case 'save-options':
           this.context.globalState.update(KeyVditorOptions, message.options)
+          break
+        case 'scroll':
+          EditorPanel._scrollPositions.set(uri.fsPath, message.top || 0)
           break
         case 'info':
           vscode.window.showInformationMessage(message.content)
@@ -766,8 +810,9 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 				<meta name="viewport" content="width=device-width, initial-scale=1.0">
 				<base href="${baseHref}" />
 
+				<style>${EditorPanel.appVisibilityCss}</style>
 
-				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet">`).join('\n')}
+				${CssFiles.map((f) => `<link href="${f}" rel="stylesheet" onload="document.body.setAttribute('data-vmd-css-loaded','1')" onerror="document.body.setAttribute('data-vmd-css-loaded','1')">`).join('\n')}
 
 				<title>markdown editor</title>
         <style>` +

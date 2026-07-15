@@ -10,6 +10,11 @@ body,
   height: 100%;
   width: 100%;
 }
+/* The hide-until-ready rule lives inline in the HTML <head> (see extension.ts),
+   not here: this stylesheet itself loads asynchronously over VS Code's webview
+   resource protocol, so a rule to hide #app placed in here would not even be in
+   effect yet during the exact window it needs to cover. The reveal condition is
+   still driven by the same data-vmd-ready attribute set from main.ts. */
 body[data-use-vscode-theme-color="1"] .vditor {
   --panel-background-color: var(--vscode-editor-background);
   --toolbar-background-color: var(--vscode-editor-background);
@@ -29,6 +34,15 @@ body[data-use-vscode-theme-color="1"] .vditor {
 }
 .vditor-ir pre.vditor-reset {
   position: relative;
+}
+/* Prevent the browser's native scroll-anchoring from autonomously shifting scrollTop
+   as async content above the viewport (mermaid diagrams, images, lazily-sized
+   elements) finishes rendering/loading. That happens independently of any of our own
+   JS and previously caused the reading position to visibly jump around on its own
+   while a large document's content was still settling. Our own restore logic already
+   handles reapplying a saved position across those same layout shifts explicitly. */
+.vditor-ir .vditor-reset {
+  overflow-anchor: none;
 }
 .vditor-panel {
   transform: translate(-25px, 0);
