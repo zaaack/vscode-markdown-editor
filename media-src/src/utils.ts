@@ -104,6 +104,43 @@ export function handleToolbarClick() {
 }
 
 /**
+ * Approximates the GitHub-style heading slug so in-page `#anchor` links (e.g. a Table
+ * of Contents) can be matched against the rendered heading text.
+ */
+function slugifyHeading(text: string): string {
+  return text
+    .trim()
+    // Vditor's IR mode keeps the literal `#`/`##`/... marker as part of the heading's
+    // textContent, unlike the final rendered output, so strip it first.
+    .replace(/^#{1,6}\s*/, '')
+    .toLowerCase()
+    .replace(/[`*_~]/g, '')
+    .replace(/[^\p{L}\p{N}\- ]+/gu, '')
+    // GitHub's heading slugger replaces each space individually rather than collapsing
+    // runs of whitespace, so e.g. "Foo & Bar" (which becomes "foo  bar" once the "&" is
+    // stripped) turns into "foo--bar", not "foo-bar".
+    .replace(/ /g, '-')
+}
+
+/**
+ * Scrolls to the heading matching an in-page `#anchor` link. Returns true if a match
+ * was found and scrolled to.
+ */
+function scrollToHeadingAnchor(fragment: string): boolean {
+  const target = decodeURIComponent(fragment).toLowerCase()
+  const headings = document.querySelectorAll(
+    '.vditor-reset h1, .vditor-reset h2, .vditor-reset h3, .vditor-reset h4, .vditor-reset h5, .vditor-reset h6'
+  )
+  for (const h of Array.from(headings)) {
+    if (slugifyHeading(h.textContent || '') === target) {
+      h.scrollIntoView({ block: 'start', behavior: 'smooth' })
+      return true
+    }
+  }
+  return false
+}
+
+/**
  * Sends raw Markdown link targets to the extension host for opening.
  */
 export function fixLinkClick() {
@@ -113,13 +150,22 @@ export function fixLinkClick() {
   document.addEventListener('click', (e) => {
     const target = e.target as HTMLElement
     const link = target.closest('a')
-    const href = link?.getAttribute('href')
+    // Vditor's IR mode never renders a real `<a href>` for links: it always shows the
+    // raw markdown syntax, with the url held in a `.vditor-ir__marker--link` marker
+    // span inside a `[data-type="a"]` wrapper, instead of a real anchor element.
+    const irLinkMarker = target
+      .closest<HTMLElement>('[data-type="a"]')
+      ?.querySelector('.vditor-ir__marker--link')
+    const href = link?.getAttribute('href') || irLinkMarker?.textContent || undefined
 
-    if (href) {
-      e.preventDefault()
-      e.stopPropagation()
-      openLink(href)
+    if (!href) return
+    e.preventDefault()
+    e.stopPropagation()
+    if (href.startsWith('#')) {
+      scrollToHeadingAnchor(href.slice(1))
+      return
     }
+    openLink(href)
   })
   window.open = (url: string, ...args: any[]) => {
     openLink(url)
