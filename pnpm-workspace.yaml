@@ -1,4 +1,5 @@
 allowBuilds:
   esbuild: true
+  core-js-pure: false
 packages:
   - "./media-src"

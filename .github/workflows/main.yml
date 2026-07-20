@@ -3,23 +3,30 @@ on:
   push:
     tags:
       - "*"
+permissions:
+  contents: read
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
         with:
-          node-version: 20
+          version: 10
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: pnpm
       - name: Install
-        run: yarn; cd ./media-src; yarn
-      - name: Test
-        run: npm test
+        run: pnpm install --frozen-lockfile
+      - name: Build
+        run: pnpm run build
       - name: Publish to Open VSX Registry
         uses: HaaLeo/publish-vscode-extension@v2
         id: publishToOpenVSX
         with:
           pat: ${{ secrets.OPEN_VSX_TOKEN }}
+          dependencies: false
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v2
         with:
