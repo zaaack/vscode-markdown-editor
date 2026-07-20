@@ -76,8 +76,15 @@ body[data-use-vscode-theme-color="1"] .vditor {
   display: none;
 }
 
+/* Vditor's setPadding() centers editable content by computing symmetric
+   left/right padding as `(containerWidth - preview.maxWidth) / 2` (maxWidth
+   defaults to 800), applied as an inline style. We override padding-left to a
+   fixed value to leave room for our own gutter/toolbar, but without an equal
+   padding-right override, wide viewports keep vditor's large computed
+   right-padding, leaving a big unused gap on the right side of the editor. */
 .vditor-reset {
   padding-left: 35px !important;
+  padding-right: 35px !important;
 }
 
 .jconfirm {
