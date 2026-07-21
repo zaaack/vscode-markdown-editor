@@ -11,6 +11,18 @@ function showError(msg: string) {
 }
 
 /**
+ * True when a document change came from disk rather than from the webview.
+ *
+ * Webview edits reach the document through applyEdit and always leave it dirty, so a
+ * change that leaves the document clean can only be VS Code reloading a file that
+ * another program wrote. That also means there is no pending webview edit to clobber:
+ * if the webview had unsynced content, the document would still be dirty.
+ */
+function isExternalReload(e: vscode.TextDocumentChangeEvent) {
+  return !e.document.isDirty
+}
+
+/**
  * Opens external URIs directly and resolves local links from the Markdown file.
  */
 async function openMarkdownLink(markdownFileUri: vscode.Uri, href: string) {
@@ -386,9 +398,10 @@ class EditorPanel {
       if (e.document.fileName !== this._document.fileName) {
         return
       }
-      // When webview panel is active, do not sync updates from VS Code editor caused by webview edits back to webview
-      // don't change webview panel when webview panel is focus
-      if (this._panel.active) {
+      // Don't echo the webview's own edits back at it, but always take a change that
+      // came from disk: the panel stays "active" while another program has focus, so
+      // this would otherwise drop every external edit.
+      if (this._panel.active && !isExternalReload(e)) {
         return
       }
       textEditTimer && clearTimeout(textEditTimer)
@@ -682,8 +695,9 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
       if (e.document.fileName !== document.fileName) {
         return
       }
-      // Do not sync when webview panel is active (avoid circular updates)
-      if (webviewPanel.active) {
+      // Don't echo the webview's own edits back at it, but always take a change that
+      // came from disk - see isExternalReload.
+      if (webviewPanel.active && !isExternalReload(e)) {
         return
       }
       updateWebview()
