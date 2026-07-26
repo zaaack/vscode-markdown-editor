@@ -14,12 +14,16 @@ function showError(msg: string) {
  * True when a document change came from disk rather than from the webview.
  *
  * Webview edits reach the document through applyEdit and always leave it dirty, so a
- * change that leaves the document clean can only be VS Code reloading a file that
- * another program wrote. That also means there is no pending webview edit to clobber:
- * if the webview had unsynced content, the document would still be dirty.
+ * content change that leaves the document clean can only be VS Code reloading a file
+ * that another program wrote. That also means there is no pending webview edit to
+ * clobber: if the webview had unsynced content, the document would still be dirty.
+ *
+ * The contentChanges check matters: onDidChangeTextDocument also fires for pure
+ * dirty-state transitions with an empty contentChanges array, so every save (incl.
+ * autosave) emits a clean-document event that must not be mistaken for a reload.
  */
 function isExternalReload(e: vscode.TextDocumentChangeEvent) {
-  return !e.document.isDirty
+  return e.contentChanges.length > 0 && !e.document.isDirty
 }
 
 /**
