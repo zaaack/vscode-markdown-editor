@@ -113,7 +113,7 @@
     "watch": "foy watch",
     "start": "foy watch",
     "build": "tsc -p ./ && pnpm --filter media-src build",
-    "pub": "foy build && npm version patch && vsce package && vsce publish && git push origin main --tags"
+    "pub": "foy build && npm version patch && vsce package && vsce publish && ovsx publish && git push origin main --tags"
   },
   "devDependencies": {
     "@types/node": "^12.12.0",
