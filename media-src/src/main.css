@@ -28,6 +28,25 @@ body[data-use-vscode-theme-color="1"] .vditor {
 .vditor--dark .vditor-reset code:not(.hljs):not(.highlight-chroma) {
   background-color: rgba(66,133,244,.1);
 }
+/* fix table wrapping to match VS Code's built-in markdown preview.
+   vditor's base style forces `white-space: nowrap` on every cell, so any cell
+   with a bit of text pushes the table wider than the editor and forces a
+   horizontal scrollbar just to read one row. Overriding it to wrap normally
+   lets the table stay within the visible width like the preview does, only
+   falling back to horizontal scroll (from vditor's `overflow: auto` on the
+   table) for genuinely unbreakable content such as long URLs. */
+.vditor-reset table td,
+.vditor-reset table th {
+  white-space: normal;
+  overflow-wrap: break-word;
+}
+/* Toggled by the "table-wrap" toolbar button (toolbar.ts): restores vditor's
+   original nowrap/horizontal-scroll table behavior for the current session. */
+body.vmd-table-nowrap .vditor-reset table td,
+body.vmd-table-nowrap .vditor-reset table th {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
 /* fix outline toolbar padding */
 .vditor-toolbar.vditor-toolbar--pin {
   padding-left: 35px!important;

@@ -2,6 +2,10 @@ import { t } from "./lang"
 import { confirm } from "./utils"
 
 const searchIcon = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>'
+const tableWrapIcon = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" width="18" height="18"><path fill="currentColor" d="M4 19h6v-2H4v2zM20 5H4v2h16V5zm-3 6H4v2h13.25c1.1 0 2 .9 2 2s-.9 2-2 2H15v-2l-3 3 3 3v-2h2c2.21 0 4-1.79 4-4s-1.79-4-4-4z"/></svg>'
+// Tracks whether tables are forced back to vditor's original nowrap/horizontal-scroll
+// behavior; defaults to off (i.e. cells wrap, matching VS Code's markdown preview).
+let tableWrapDisabled = false
 
 export const toolbar = [
 	{
@@ -42,6 +46,17 @@ export const toolbar = [
 	'|',
 	'upload',
 	'table',
+	{
+		name: 'table-wrap',
+		tipPosition: 's',
+		tip: 'Toggle table cell wrapping (on: fits the editor width like the preview; off: original nowrap/horizontal-scroll)',
+		icon: tableWrapIcon,
+		click(event: MouseEvent & { currentTarget: HTMLElement }) {
+			tableWrapDisabled = !tableWrapDisabled
+			document.body.classList.toggle('vmd-table-nowrap', tableWrapDisabled)
+			event.currentTarget.classList.toggle('vditor-icon--current', tableWrapDisabled)
+		},
+	},
 	'|',
 	'undo',
 	'redo',
