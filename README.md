@@ -73,10 +73,6 @@ Edit your settings.json and add
 - [vditor](https://github.com/Vanessa219/vditor)
 
 
-## Todo
-
-- [ ] Using [Custom Text Editor](https://code.visualstudio.com/api/extension-guides/custom-editors#custom-text-editor) ([demo](https://github.com/gera2ld/markmap-vscode))
-
 ## License
 
 MIT
