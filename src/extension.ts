@@ -10,20 +10,30 @@ function showError(msg: string) {
   vscode.window.showErrorMessage(`[markdown-editor] ${msg}`)
 }
 
+const normalizeEol = (s: string) => s.replace(/\r\n/g, '\n')
+
 /**
- * True when a document change came from disk rather than from the webview.
+ * True when a document change is just the echo of content that was applied into the
+ * document from the webview, rather than a change that came from disk.
  *
- * Webview edits reach the document through applyEdit and always leave it dirty, so a
- * content change that leaves the document clean can only be VS Code reloading a file
- * that another program wrote. That also means there is no pending webview edit to
- * clobber: if the webview had unsynced content, the document would still be dirty.
- *
- * The contentChanges check matters: onDidChangeTextDocument also fires for pure
- * dirty-state transitions with an empty contentChanges array, so every save (incl.
- * autosave) emits a clean-document event that must not be mistaken for a reload.
+ * The previous heuristic (`contentChanges.length > 0 && !isDirty`) misfired: VS Code
+ * dispatches onDidChangeTextDocument while applyEdit is still running, and on the
+ * first edit to a clean document `isDirty` can still read false at that moment, so
+ * the webview's own edit was classified as an external reload and pushed back into
+ * the webview via setValue, rebuilding the IR DOM and resetting the caret (issue
+ * #176). Comparing content against what was last applied from the webview is
+ * independent of dirty-flag timing: an echo round-trips identical, a disk change
+ * does not. The empty-contentChanges short-circuit (pure dirty-state transitions on
+ * save/autosave) stays inline at the call sites.
  */
-function isExternalReload(e: vscode.TextDocumentChangeEvent) {
-  return e.contentChanges.length > 0 && !e.document.isDirty
+function isWebviewEcho(
+  e: vscode.TextDocumentChangeEvent,
+  lastSyncedToDoc: string | undefined
+) {
+  return (
+    lastSyncedToDoc !== undefined &&
+    normalizeEol(e.document.getText()) === normalizeEol(lastSyncedToDoc)
+  )
 }
 
 /**
@@ -131,6 +141,13 @@ class EditorPanel {
   static appVisibilityCss = `#app{opacity:0}body[data-vmd-ready="1"][data-vmd-css-loaded="1"] #app{opacity:1}`
 
   private _disposables: vscode.Disposable[] = []
+  /**
+   * Content last applied into `_document` from the webview; baseline for
+   * isWebviewEcho. Seeded with the document text at construction and refreshed in
+   * syncToEditor before applyEdit (the change event fires while applyEdit runs, so
+   * the baseline must already be updated when the handler reads it).
+   */
+  private _lastSyncedToDoc: string | undefined
 
   public static async createOrShow(
     context: vscode.ExtensionContext,
@@ -379,6 +396,9 @@ class EditorPanel {
 
     this._init()
 
+    // Seed echo detection with the content the webview is about to receive.
+    this._lastSyncedToDoc = this._document.getText()
+
     // Listen for when the panel is disposed
     // This happens when the user closes the panel or when the panel is closed programmatically
     this._panel.onDidDispose(() => this.dispose(), null, this._disposables)
@@ -405,7 +425,10 @@ class EditorPanel {
       // Don't echo the webview's own edits back at it, but always take a change that
       // came from disk: the panel stays "active" while another program has focus, so
       // this would otherwise drop every external edit.
-      if (this._panel.active && !isExternalReload(e)) {
+      if (
+        this._panel.active &&
+        (e.contentChanges.length === 0 || isWebviewEcho(e, this._lastSyncedToDoc))
+      ) {
         return
       }
       textEditTimer && clearTimeout(textEditTimer)
@@ -422,6 +445,10 @@ class EditorPanel {
         const syncToEditor = async () => {
           debug('sync to editor', this._document, this._uri)
           if (this._document) {
+            // Record before awaiting applyEdit: the document-change event fires
+            // while applyEdit is still running, and its handler compares the
+            // document against this baseline to recognize our own echo.
+            this._lastSyncedToDoc = message.content
             const edit = new vscode.WorkspaceEdit()
             edit.replace(
               this._document.uri,
@@ -665,6 +692,8 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
     const disposables: vscode.Disposable[] = []
     let isEditing = false
+    // Echo-detection baseline for isWebviewEcho; refreshed in syncToEditor below.
+    let lastSyncedToDoc: string | undefined = document.getText()
 
     // Update title to show edit status
     const updateEditTitle = () => {
@@ -700,8 +729,11 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
         return
       }
       // Don't echo the webview's own edits back at it, but always take a change that
-      // came from disk - see isExternalReload.
-      if (webviewPanel.active && !isExternalReload(e)) {
+      // came from disk - see isWebviewEcho.
+      if (
+        webviewPanel.active &&
+        (e.contentChanges.length === 0 || isWebviewEcho(e, lastSyncedToDoc))
+      ) {
         return
       }
       updateWebview()
@@ -713,6 +745,8 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
       debug('msg from webview', message, webviewPanel.active)
 
       const syncToEditor = async () => {
+        // Record before awaiting applyEdit - see the EditorPanel twin.
+        lastSyncedToDoc = message.content
         const edit = new vscode.WorkspaceEdit()
         edit.replace(
           document.uri,
