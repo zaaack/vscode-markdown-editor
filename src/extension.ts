@@ -408,6 +408,9 @@ class EditorPanel {
       if (this._panel.active && !isExternalReload(e)) {
         return
       }
+      if (this._document.getText() === this._lastSyncedContent) {
+        return
+      }
       textEditTimer && clearTimeout(textEditTimer)
       textEditTimer = setTimeout(() => {
         this._update()
@@ -429,6 +432,7 @@ class EditorPanel {
               message.content
             )
             await vscode.workspace.applyEdit(edit)
+            this._lastSyncedContent = this._document.getText()
           } else if (this._uri) {
             await vscode.workspace.fs.writeFile(this._uri, message.content)
           } else {
@@ -562,6 +566,7 @@ class EditorPanel {
     this._panel.title = NodePath.basename(this._fsPath)
   }
   private _isEdit = false
+  private _lastSyncedContent: string | undefined
   private _updateEditTitle() {
     const isEdit = this._document.isDirty
     if (isEdit !== this._isEdit) {
@@ -587,6 +592,7 @@ class EditorPanel {
       ? this._document.getText()
       : (await vscode.workspace.fs.readFile(this._uri)).toString()
     // const dir = NodePath.dirname(this._document.fileName)
+    this._lastSyncedContent = undefined
     this._panel.webview.postMessage({
       command: 'update',
       content: md,
@@ -665,6 +671,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
     const disposables: vscode.Disposable[] = []
     let isEditing = false
+    let lastSyncedContent: string | undefined
 
     // Update title to show edit status
     const updateEditTitle = () => {
@@ -677,6 +684,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 
     // Send update to webview
     const updateWebview = (props: { type?: 'init' | 'update'; options?: any; theme?: 'dark' | 'light' } = {}) => {
+      lastSyncedContent = undefined
       webviewPanel.webview.postMessage({
         command: 'update',
         content: document.getText(),
@@ -704,6 +712,9 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
       if (webviewPanel.active && !isExternalReload(e)) {
         return
       }
+      if (document.getText() === lastSyncedContent) {
+        return
+      }
       updateWebview()
       updateEditTitle()
     }, null, disposables)
@@ -720,6 +731,7 @@ class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
           message.content
         )
         await vscode.workspace.applyEdit(edit)
+        lastSyncedContent = document.getText()
       }
 
       switch (message.command) {
