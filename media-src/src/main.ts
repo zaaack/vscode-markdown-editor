@@ -162,6 +162,74 @@ function restoreScrollPosition(scrollTop: number) {
   }, POLL_MS)
 }
 
+// Last markdown this webview pushed to the extension; used to recognise echoes of our
+// own edits so they never reset the editor (setValue throws the caret to line 1).
+let lastSentContent: string | null = null
+
+function getIrEl(): HTMLElement | null {
+  return document.querySelector<HTMLElement>('.vditor-ir .vditor-reset')
+}
+
+// Caret position as a character offset into the IR element's text, or null if the
+// caret isn't inside the editor.
+function saveCaretOffset(root: HTMLElement): number | null {
+  const sel = window.getSelection()
+  if (!sel || sel.rangeCount === 0 || !root.contains(sel.anchorNode)) return null
+  const range = document.createRange()
+  range.selectNodeContents(root)
+  range.setEnd(sel.anchorNode as Node, sel.anchorOffset)
+  return range.toString().length
+}
+
+function restoreCaretOffset(root: HTMLElement, offset: number) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+  let remaining = offset
+  let node: Node | null
+  let last: Node | null = null
+  while ((node = walker.nextNode())) {
+    last = node
+    const len = node.textContent?.length || 0
+    if (remaining <= len) {
+      const range = document.createRange()
+      range.setStart(node, remaining)
+      range.collapse(true)
+      const sel = window.getSelection()
+      sel?.removeAllRanges()
+      sel?.addRange(range)
+      return
+    }
+    remaining -= len
+  }
+  if (last) {
+    const range = document.createRange()
+    range.setStart(last, last.textContent?.length || 0)
+    range.collapse(true)
+    const sel = window.getSelection()
+    sel?.removeAllRanges()
+    sel?.addRange(range)
+  }
+}
+
+// Applies a document change that originated outside this webview. Skips no-op updates
+// (our own edits echoed back) and keeps the caret/scroll where the user was typing
+// instead of letting setValue reset them to the top of the document.
+function applyExternalContent(content: string) {
+  if (content === lastSentContent || content === vditor.getValue()) {
+    return
+  }
+  const root = getIrEl()
+  const caret = root ? saveCaretOffset(root) : null
+  const scrollEl = getScrollEl()
+  const scrollTop = scrollEl ? scrollEl.scrollTop : 0
+  vditor.setValue(content)
+  lastSentContent = content
+  const newRoot = getIrEl()
+  if (newRoot && caret !== null) {
+    restoreCaretOffset(newRoot, caret)
+  }
+  if (scrollEl) scrollEl.scrollTop = scrollTop
+}
+
 function initVditor(msg) {
   console.log('msg', msg)
   // Hide the editor again for the duration of this (re)build - see main.css and the
@@ -170,6 +238,7 @@ function initVditor(msg) {
   // change reuses the same webview), which would otherwise skip re-hiding and show
   // the intermediate rebuild state.
   document.body.removeAttribute('data-vmd-ready')
+  lastSentContent = null
   let inputTimer
   let defaultOptions: any = {}
   defaultOptions = merge(defaultOptions, msg.options, {
@@ -227,7 +296,8 @@ function initVditor(msg) {
     input() {
       inputTimer && clearTimeout(inputTimer)
       inputTimer = setTimeout(() => {
-        vscode.postMessage({ command: 'edit', content: vditor.getValue() })
+        lastSentContent = vditor.getValue()
+        vscode.postMessage({ command: 'edit', content: lastSentContent })
       }, 100)
     },
     upload: {
@@ -276,8 +346,7 @@ window.addEventListener('message', (e) => {
         }
         console.log('initVditor')
       } else {
-        vditor.setValue(msg.content)
-        console.log('setValue')
+        applyExternalContent(msg.content)
       }
       break
     }
