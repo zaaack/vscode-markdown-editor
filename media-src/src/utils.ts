@@ -141,10 +141,41 @@ function scrollToHeadingAnchor(fragment: string): boolean {
 }
 
 /**
+ * Resolves a reference-style link (`[text][label]`, `[label][]` or `[label]`) to the URL
+ * of its `[label]: url` definition in the current document.
+ */
+function resolveReferenceLink(refEl: HTMLElement): string | undefined {
+  const normalize = (s: string) => s.trim().replace(/\s+/g, ' ').toLowerCase()
+  // In IR mode the label lives in a `--link` marker as `[label]` when explicit; for the
+  // collapsed/shortcut forms it is the link text itself.
+  const explicit = refEl
+    .querySelector('.vditor-ir__marker--link')
+    ?.textContent?.match(/^\[(.*)\]$/)?.[1]
+  const text = refEl.children[1]?.textContent || ''
+  const label = normalize(explicit || text)
+  if (!label) return undefined
+
+  const markdown: string = (window as any).vditor?.getValue?.() || ''
+  for (const line of markdown.split(/\r?\n/)) {
+    const m = line.match(/^ {0,3}\[([^\]]+)\]:\s*(?:<([^>]*)>|(\S+))/)
+    if (m && !m[1].startsWith('^') && normalize(m[1]) === label) {
+      return m[2] ?? m[3]
+    }
+  }
+  return undefined
+}
+
+/**
  * Sends raw Markdown link targets to the extension host for opening.
  */
 export function fixLinkClick() {
+  let lastOpen = { href: '', at: 0 }
   const openLink = (url: string) => {
+    // Vditor's own click handler calls window.open (patched below) and the document
+    // click listener also fires for the same click, which would open the link twice.
+    const now = Date.now()
+    if (url === lastOpen.href && now - lastOpen.at < 500) return
+    lastOpen = { href: url, at: now }
     vscode.postMessage({ command: 'open-link', href: url })
   }
   document.addEventListener('click', (e) => {
@@ -156,7 +187,12 @@ export function fixLinkClick() {
     const irLinkMarker = target
       .closest<HTMLElement>('[data-type="a"]')
       ?.querySelector('.vditor-ir__marker--link')
-    const href = link?.getAttribute('href') || irLinkMarker?.textContent || undefined
+    const refEl = target.closest<HTMLElement>('[data-type="link-ref"]')
+    const href =
+      link?.getAttribute('href') ||
+      irLinkMarker?.textContent ||
+      (refEl && resolveReferenceLink(refEl)) ||
+      undefined
 
     if (!href) return
     e.preventDefault()
