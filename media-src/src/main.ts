@@ -162,6 +162,49 @@ function restoreScrollPosition(scrollTop: number) {
   }, POLL_MS)
 }
 
+// Chromium puts the caret at the START of a line when you click in the empty space to
+// the right of a line that begins with an inline node (e.g. `**bold**`): Vditor's
+// collapsed markers are zero-size inline-blocks, and hit-testing resolves to the first
+// one instead of the end of the line. Re-place the caret at the end of the clicked line.
+function fixClickPastLineEnd(e: MouseEvent) {
+  const root = document.querySelector<HTMLElement>('.vditor-ir .vditor-reset')
+  const target = e.target as HTMLElement | null
+  if (!root || !target || e.button !== 0 || e.shiftKey || !root.contains(target)) return
+  if (!/^(LI|P|H[1-6]|BLOCKQUOTE)$/.test(target.tagName)) return
+  const sel = window.getSelection()
+  if (!sel || !sel.isCollapsed) return
+
+  const walker = document.createTreeWalker(target, NodeFilter.SHOW_TEXT)
+  let best: { node: Text; rect: DOMRect } | null = null
+  let node: Node | null
+  while ((node = walker.nextNode())) {
+    const text = node as Text
+    // Skip text belonging to nested blocks (e.g. a sub-list inside this <li>)
+    if (!text.data || text.parentElement?.closest('li, p, h1, h2, h3, h4, h5, h6, blockquote') !== target) continue
+    const range = document.createRange()
+    range.selectNodeContents(text)
+    for (const r of Array.from(range.getClientRects())) {
+      if (r.height === 0 || e.clientY < r.top || e.clientY > r.bottom) continue
+      if (!best || r.right > best.rect.right) best = { node: text, rect: r }
+    }
+  }
+  if (!best || e.clientX <= best.rect.right) return
+
+  let offset = best.node.length
+  const probe = document.createRange()
+  for (; offset > 0; offset--) {
+    probe.setStart(best.node, offset)
+    probe.collapse(true)
+    const r = probe.getClientRects()[0]
+    if (r && r.top >= best.rect.top - 1 && r.bottom <= best.rect.bottom + 1) break
+  }
+  const caret = document.createRange()
+  caret.setStart(best.node, offset)
+  caret.collapse(true)
+  sel.removeAllRanges()
+  sel.addRange(caret)
+}
+
 // Last markdown this webview pushed to the extension; used to recognise echoes of our
 // own edits so they never reset the editor (setValue throws the caret to line 1).
 let lastSentContent: string | null = null
@@ -284,6 +327,10 @@ function initVditor(msg) {
         ;(window as any).__vmdSearch = initSearch()
       }
       trackScrollPosition()
+      if (!(window as any).__vmdClickFix) {
+        ;(window as any).__vmdClickFix = true
+        document.addEventListener('mouseup', fixClickPastLineEnd)
+      }
       restoreScrollPosition(msg.scrollTop)
       // Reveal the editor (see main.css) only once Vditor's own DOM/CSS has fully
       // settled and the saved scroll position has already been applied, so the very
