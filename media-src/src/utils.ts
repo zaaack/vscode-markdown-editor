@@ -219,12 +219,26 @@ see: https://github.com/nwjs/nw.js/issues/3403 */
 export function fixCut() {
   let _exec = document.execCommand.bind(document)
   document.execCommand = (cmd, ...args) => {
-    if (cmd === 'delete') {
-      setTimeout(() => {
-        return _exec(cmd, ...args)
-      })
-    } else {
-      return _exec(cmd, ...args)
+    let res = false
+    try {
+      res = _exec(cmd, ...args)
+    } catch (e) {
+      res = false
     }
+    if (cmd === 'delete') {
+      const sel = window.getSelection()
+      if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+        sel.getRangeAt(0).deleteContents()
+        res = true
+      }
+      const v = (window as any).vditor?.vditor
+      const mode = v && v.currentMode
+      const r: Range = v && v[mode] && v[mode].range
+      if (r && !r.collapsed) {
+        r.deleteContents()
+        res = true
+      }
+    }
+    return res
   }
 }
