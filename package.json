@@ -40,17 +40,25 @@
         "category": "markdown-editor"
       }
     ],
+    "languages": [
+      {
+        "id": "markdown",
+        "extensions": [
+          ".mdc"
+        ]
+      }
+    ],
     "menus": {
       "explorer/context": [
         {
-          "when": "resourceLangId == markdown",
+          "when": "resourceLangId == markdown || resourceExtname == .mdc",
           "command": "markdown-editor.openEditor",
           "group": "navigation"
         }
       ],
       "editor/title/context": [
         {
-          "when": "resourceLangId == markdown",
+          "when": "resourceLangId == markdown || resourceExtname == .mdc",
           "command": "markdown-editor.openEditor",
           "group": "1_open"
         }
@@ -66,6 +74,9 @@
           },
           {
             "filenamePattern": "*.markdown"
+          },
+          {
+            "filenamePattern": "*.mdc"
           }
         ],
         "priority": "option"
@@ -105,7 +116,7 @@
         "key": "ctrl+shift+alt+m",
         "command": "markdown-editor.openEditor",
         "mac": "cmd+shift+alt+m",
-        "when": "editorTextFocus && editorLangId == markdown"
+        "when": "editorTextFocus && (editorLangId == markdown || resourceExtname == .mdc)"
       }
     ]
   },

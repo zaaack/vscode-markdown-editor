@@ -12,6 +12,13 @@ function showError(msg: string) {
 
 const normalizeEol = (s: string) => s.replace(/\r\n/g, '\n')
 
+function isMarkdownDocument(doc: vscode.TextDocument): boolean {
+  return (
+    doc.languageId === 'markdown' ||
+    /\.(md|markdown|mdc)$/i.test(doc.fileName)
+  )
+}
+
 /**
  * True when a document change is just the echo of content that was applied into the
  * document from the webview, rather than a change that came from disk.
@@ -40,6 +47,11 @@ function isWebviewEcho(
  * Opens external URIs directly and resolves local links from the Markdown file.
  */
 async function openMarkdownLink(markdownFileUri: vscode.Uri, href: string) {
+  if (href.startsWith('mdc:')) {
+    href = href.slice(4)
+    href = href.replace(/^(https?):\/([^\/])/, '$1://$2')
+  }
+
   if (/^https?:\/\//.test(href)) {
     await vscode.commands.executeCommand('vscode.open', vscode.Uri.parse(href))
     return
@@ -190,7 +202,7 @@ class EditorPanel {
     } else {
       doc = vscode.window.activeTextEditor?.document
       // from command mode
-      if (doc && doc.languageId !== 'markdown') {
+      if (doc && !isMarkdownDocument(doc)) {
         showError(
           `Current file language is not markdown, got ${doc.languageId}`
         )
